@@ -108,7 +108,7 @@ public sealed partial class AboutViewModel : PageViewModelBase
 
     public string AppName => "PokeLauncher";
 
-    public string Version => "0.12.0-distribution";
+    public string Version => "0.12.1-distribution";
 
     public string Tagline => "Organize, discover, and launch your Pokémon collection.";
 
