@@ -1,0 +1,273 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:controls="using:PokeLauncher.Controls"
+             xmlns:conv="using:Avalonia.Data.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="PokeLauncher.Views.GameDetailsView"
+             x:DataType="vm:GameDetailsViewModel">
+
+    <ScrollViewer Padding="{StaticResource PagePadding}">
+        <Panel>
+            <StackPanel IsVisible="{Binding HasGame}" Spacing="18">
+            <Border Classes="card" Padding="0">
+                <Grid ColumnDefinitions="330,*">
+                    <Panel Margin="18">
+                        <controls:GameCover Game="{Binding Game}"
+                            Title="{Binding Game.Title}"
+                            Subtitle="{Binding Game.Platform}"
+                            FromColor="{Binding Game.CoverFrom}"
+                            ToColor="{Binding Game.CoverTo}"
+                            Height="420" BallSize="120"
+                            TitleFontSize="22"/>
+                    </Panel>
+                    <StackPanel Grid.Column="1" Margin="6,24,26,24" Spacing="14">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="chip"><TextBlock Text="{Binding Game.GenerationLabel}"/></Border>
+                            <Border Classes="chip"><TextBlock Text="{Binding Game.Platform}"/></Border>
+                            <Border Classes="chip"><TextBlock Text="{Binding Game.ReleaseYearText}"/></Border>
+                            <Border Classes="chip" Classes.ok="{Binding Game.HasHealthyRom}">
+                                <TextBlock Text="{Binding Game.RomFileStatus}"/>
+                            </Border>
+                            <Border Classes="chip accent" IsVisible="{Binding Game.IsRunning}">
+                                <TextBlock Text="Now playing"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Game.Title}" FontSize="30" FontWeight="Bold" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding Game.Description}" FontSize="13"
+                                   Foreground="{DynamicResource TextSecondaryBrush}"
+                                   TextWrapping="Wrap" MaxWidth="560"
+                                   HorizontalAlignment="Left"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <Button Theme="{StaticResource PrimaryButton}"
+                                    Command="{Binding PlayCommand}"
+                                    IsEnabled="{Binding !Game.IsRunning}"
+                                    IsVisible="{Binding Game.HasRom}"
+                                    AutomationProperties.Name="Play this game">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <TextBlock Text="&#xE768;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="15" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Game.PlayButtonLabel}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Theme="{StaticResource PrimaryButton}"
+                                    Command="{Binding ImportRomCommand}"
+                                    IsVisible="{Binding !Game.HasRom}"
+                                    AutomationProperties.Name="{Binding Game.RomEditorAutomationName}">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <TextBlock Text="&#xE8B5;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="15" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Import ROM…" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <ToggleButton Theme="{StaticResource StarToggleButton}"
+                                          IsChecked="{Binding Game.IsFavorite, Mode=TwoWay}"
+                                          AutomationProperties.Name="Toggle favorite"/>
+                            <Button Theme="{StaticResource SecondaryButton}"
+                                    Command="{Binding EditDetailsCommand}"
+                                    AutomationProperties.Name="{Binding Game.EditAutomationName}">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <TextBlock Text="&#xE70F;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="13" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Edit details" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Theme="{StaticResource SecondaryButton}"
+                                    Command="{Binding SetCoverArtCommand}"
+                                    AutomationProperties.Name="Set cover art">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <TextBlock Text="&#xEB9F;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="13" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Set cover art…" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Theme="{StaticResource SecondaryButton}"
+                                    Command="{Binding RemoveCoverArtCommand}"
+                                    IsVisible="{Binding Game.HasCoverArt}"
+                                    AutomationProperties.Name="Remove cover art">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="13" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Remove cover art" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Launch failure: inline, with the fix one click away -->
+                        <Border Classes="info-strip" MaxWidth="560" HorizontalAlignment="Left"
+                                BorderBrush="{DynamicResource MediumBrush}"
+                                IsVisible="{Binding HasLaunchError}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                               Foreground="{DynamicResource MediumBrush}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding LaunchError}"
+                                               TextWrapping="Wrap" VerticalAlignment="Center" MaxWidth="420"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Button Theme="{StaticResource SecondaryButton}" Padding="10,5" FontSize="12"
+                                            Command="{Binding OpenEmulatorSettingsCommand}"
+                                            IsVisible="{Binding LaunchErrorNeedsEmulator}"
+                                            AutomationProperties.Name="Open emulator settings">
+                                        Open Settings
+                                    </Button>
+                                    <Button Theme="{StaticResource GhostIconButton}" Content="&#xE711;"
+                                            Command="{Binding DismissLaunchErrorCommand}"
+                                            AutomationProperties.Name="Dismiss launch error"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Classes="info-strip" MaxWidth="560" HorizontalAlignment="Left"
+                                IsVisible="{Binding !Game.HasRom}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="9">
+                                <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                           Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="This game has no ROM file yet. Import your own legally obtained copy to play it here — supported types: .gb, .gbc, .gba, .nds, .zip."
+                                           TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <Border Classes="info-strip" MaxWidth="560" HorizontalAlignment="Left"
+                                IsVisible="{Binding Game.IsRomMissing}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="9">
+                                <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                           Foreground="{DynamicResource MediumBrush}" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="The recorded ROM file can't be found on disk — it may have been moved or deleted. Edit the game to attach it again, or re-import it from My Library."
+                                           TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <Grid ColumnDefinitions="140,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" MaxWidth="560"
+                              HorizontalAlignment="Left" Margin="0,4,0,0">
+                            <TextBlock Text="Last played" Classes="secondary" FontSize="12" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Game.LastPlayedText}" FontSize="12" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="1" Text="Playtime" Classes="secondary" FontSize="12" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Game.PlaytimeText}" FontSize="12" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="2" Text="ROM file" Classes="secondary" FontSize="12" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Game.RomFileStatus}" FontSize="12" Margin="0,4,0,4"
+                                       TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Game.RomPath}"/>
+                            <TextBlock Grid.Row="3" Text="Release year" Classes="secondary" FontSize="12" Margin="0,4,0,4"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Game.ReleaseYear}" FontSize="12" Margin="0,4,0,4"
+                                       IsVisible="{Binding Game.IsImported, Converter={x:Static conv:BoolConverters.Not}}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Imported game" FontSize="12" Margin="0,4,0,4"
+                                       IsVisible="{Binding Game.IsImported}"/>
+                            <TextBlock Grid.Row="4" Text="Collections" Classes="secondary" FontSize="12" Margin="0,4,0,4"
+                                       VerticalAlignment="Top"/>
+                            <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,2,0,2">
+                                <ItemsControl ItemsSource="{Binding CollectionChips}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:CollectionChip">
+                                            <ToggleButton Theme="{StaticResource ChipToggleButton}"
+                                                          IsChecked="{Binding IsMember, Mode=OneWay}"
+                                                          Command="{Binding $parent[ItemsControl].((vm:GameDetailsViewModel)DataContext).ToggleCollectionCommand}"
+                                                          CommandParameter="{Binding}"
+                                                          Margin="0,0,6,6"
+                                                          AutomationProperties.Name="{Binding Name}">
+                                                <TextBlock Text="{Binding Name}" FontSize="12"/>
+                                            </ToggleButton>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock Text="No collections yet — create one on the Collections page." Classes="tertiary" FontSize="11.5"
+                                           IsVisible="{Binding !HasCollectionChips}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Row="5" Text="Added" Classes="secondary" FontSize="12" Margin="0,4,0,4"
+                                       IsVisible="{Binding Game.IsImported}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Game.AddedText}" FontSize="12" Margin="0,4,0,4"
+                                       IsVisible="{Binding Game.IsImported}"/>
+                        </Grid>
+
+                        <!-- Recent activity: real recorded emulator sessions -->
+                        <StackPanel MaxWidth="560" HorizontalAlignment="Left" Spacing="6"
+                                    IsVisible="{Binding HasSessions}" Margin="0,8,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="Recent sessions" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SessionsCaption}" Classes="tertiary" FontSize="11.5" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <ItemsControl ItemsSource="{Binding RecentSessions}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:SessionLine">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,1">
+                                            <TextBlock Text="{Binding Duration}" FontSize="12" Width="72"
+                                                       Foreground="{DynamicResource SuccessBrush}"/>
+                                            <TextBlock Text="·" Classes="tertiary" FontSize="12"/>
+                                            <TextBlock Text="{Binding When}" Classes="secondary" FontSize="12"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ==================== Saves & backups ==================== -->
+            <Border Classes="card" Padding="18" IsVisible="{Binding HasGame}">
+                <StackPanel Spacing="10" MaxWidth="640" HorizontalAlignment="Left">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="Saves and backups" Classes="section-title"/>
+                            <TextBlock Text="{Binding SavesCaption}" Classes="tertiary" FontSize="11.5"
+                                       IsVisible="{Binding HasSaveBackups}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Padding="10,5"
+                                Command="{Binding BackUpNowCommand}"
+                                AutomationProperties.Name="Back up saves now">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <TextBlock Text="&#xE8E5;" FontFamily="{StaticResource IconFont}" FontSize="12" VerticalAlignment="Center"/>
+                                <TextBlock Text="Back up now" FontSize="12" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    <TextBlock Text="Emulators write save files next to the managed ROM. PokeLauncher snapshots them automatically before every launch; restoring a snapshot first keeps a safety copy of the current saves."
+                               Classes="tertiary" FontSize="11.5" TextWrapping="Wrap"/>
+                    <ItemsControl ItemsSource="{Binding SaveBackups}" IsVisible="{Binding HasSaveBackups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:SaveBackupRowViewModel">
+                                <Border Background="{DynamicResource SurfaceBrush}"
+                                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                        BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,6">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" VerticalAlignment="Center">
+                                        <StackPanel Spacing="1">
+                                            <TextBlock Text="{Binding CreatedText}" FontSize="12.5" FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding Backup.Summary}" Classes="tertiary" FontSize="11.5"/>
+                                        </StackPanel>
+                                        <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Padding="10,4" FontSize="12"
+                                                Command="{Binding $parent[ItemsControl].((vm:GameDetailsViewModel)DataContext).RestoreBackupCommand}"
+                                                CommandParameter="{Binding}"
+                                                Content="{Binding RestoreLabel}"
+                                                AutomationProperties.Name="Restore this save backup"
+                                                Margin="0,0,8,0"/>
+                                        <Button Grid.Column="2" Theme="{StaticResource SecondaryButton}" Padding="10,4" FontSize="12"
+                                                Command="{Binding $parent[ItemsControl].((vm:GameDetailsViewModel)DataContext).DeleteBackupCommand}"
+                                                CommandParameter="{Binding}"
+                                                Content="Delete"
+                                                AutomationProperties.Name="Delete this save backup"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="No save backups yet — they appear automatically after you play a game that has save files."
+                               Classes="tertiary" FontSize="11.5" IsVisible="{Binding !HasSaveBackups}"/>
+                </StackPanel>
+            </Border>
+            </StackPanel>
+            <Border Classes="card" IsVisible="{Binding !HasGame}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="440">
+                <StackPanel Spacing="4" HorizontalAlignment="Center">
+                    <TextBlock Text="No game selected" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Open any game from your library, favorites, or Home to see its details."
+                               Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Panel>
+    </ScrollViewer>
+</UserControl>

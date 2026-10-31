@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="PokeLauncher.Views.FavoritesView"
+             x:DataType="vm:FavoritesViewModel">
+
+    <DockPanel Margin="{StaticResource PagePadding}">
+        <StackPanel DockPanel.Dock="Top" Spacing="2">
+            <TextBlock Text="Favorites" Classes="page-title"/>
+            <TextBlock Text="{Binding CountLabel}" Classes="secondary" FontSize="13"/>
+        </StackPanel>
+
+        <Panel Margin="0,16,0,0">
+            <ScrollViewer IsVisible="{Binding HasFavorites}">
+                <ItemsControl ItemsSource="{Binding FavoriteGames}"
+                              ItemTemplate="{StaticResource GameCardTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+            <Border Classes="card" IsVisible="{Binding !HasFavorites}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <TextBlock Text="No favorites yet" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Star a game from the Library or its details page and it will appear here. The global search in the top bar filters this list too."
+                               Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Panel>
+    </DockPanel>
+</UserControl>

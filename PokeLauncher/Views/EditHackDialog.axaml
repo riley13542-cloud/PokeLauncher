@@ -1,0 +1,131 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PokeLauncher.ViewModels"
+        xmlns:conv="using:Avalonia.Data.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="720"
+        x:Class="PokeLauncher.Views.EditHackDialog"
+        x:DataType="vm:EditHackDialogViewModel"
+        Title="{Binding DialogTitle}"
+        Width="600" Height="700" MinWidth="520" MinHeight="560"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="True"
+        Background="{DynamicResource BgBaseBrush}"
+        FontFamily="fonts:Inter#Inter,Segoe UI">
+
+    <Grid Margin="22" RowDefinitions="Auto,*,Auto">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,14">
+            <TextBlock Text="{Binding DialogTitle}" FontSize="19" FontWeight="Bold"/>
+            <TextBlock Text="A ROM hack's playable file is an already-patched ROM you provide — PokeLauncher launches it through the base game's emulator. Patching itself arrives in a later release."
+                       Classes="secondary" FontSize="12" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Title" Classes="group-label"/>
+                    <TextBox Text="{Binding Title, Mode=TwoWay}" MinHeight="36" VerticalContentAlignment="Center"
+                             PlaceholderText="e.g. Pokémon Radical Red"
+                             AutomationProperties.Name="Hack title"/>
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Base game" Classes="group-label"/>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="280" HorizontalAlignment="Left"
+                              ItemsSource="{Binding CatalogGames}"
+                              SelectedItem="{Binding SelectedBaseGame, Mode=TwoWay}"
+                              AutomationProperties.Name="Base game">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:GameViewModel">
+                                <TextBlock Text="{Binding Title}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBlock Text="The hack launches through the base game's emulator." Classes="tertiary" FontSize="11.5"/>
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Patched ROM file" Classes="group-label"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Text="{Binding RomPath, Mode=TwoWay}" MinHeight="36" VerticalContentAlignment="Center"
+                                 PlaceholderText="Path to the patched ROM"
+                                 AutomationProperties.Name="Patched ROM path"/>
+                        <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Margin="10,0,0,0"
+                                Command="{Binding BrowseRomCommand}"
+                                AutomationProperties.Name="Browse for the patched ROM">Browse…</Button>
+                    </Grid>
+                    <TextBlock Text="{Binding RomFileStatus}" Classes="tertiary" FontSize="11.5"/>
+                </StackPanel>
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <StackPanel Grid.Column="0" Spacing="6">
+                        <TextBlock Text="Genre" Classes="group-label"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}"
+                                  ItemsSource="{Binding GenreOptions}"
+                                  SelectedItem="{Binding SelectedGenre, Mode=TwoWay}"
+                                  AutomationProperties.Name="Genre"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <TextBlock Text="Difficulty" Classes="group-label"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}"
+                                  ItemsSource="{Binding DifficultyOptions}"
+                                  SelectedItem="{Binding SelectedDifficulty, Mode=TwoWay}"
+                                  AutomationProperties.Name="Difficulty"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Spacing="6">
+                        <TextBlock Text="Status" Classes="group-label"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}"
+                                  ItemsSource="{Binding StatusOptions}"
+                                  SelectedItem="{Binding SelectedStatus, Mode=TwoWay}"
+                                  AutomationProperties.Name="Status"/>
+                    </StackPanel>
+                </Grid>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Creator" Classes="group-label"/>
+                    <TextBox Text="{Binding Creator, Mode=TwoWay}" MinHeight="36" VerticalContentAlignment="Center"
+                             PlaceholderText="Who made it"
+                             AutomationProperties.Name="Creator"/>
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Description" Classes="group-label"/>
+                    <TextBox Text="{Binding Description, Mode=TwoWay}" MinHeight="90"
+                             TextWrapping="Wrap" AcceptsReturn="True"
+                             PlaceholderText="What makes this hack worth playing"
+                             AutomationProperties.Name="Description"/>
+                </StackPanel>
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Official page (optional)" Classes="group-label"/>
+                    <TextBox Text="{Binding Url, Mode=TwoWay}" MinHeight="36" VerticalContentAlignment="Center"
+                             PlaceholderText="https://…"
+                             AutomationProperties.Name="Official page URL"/>
+                </StackPanel>
+
+                <Border Classes="info-strip" Margin="0,6,0,0" IsVisible="{Binding !IsCreate}">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Deleting a hack removes its library entry and bookmark. The patched ROM file on disk is never touched."
+                                   Classes="tertiary" TextWrapping="Wrap"/>
+                        <Button Theme="{StaticResource SecondaryButton}"
+                                Command="{Binding ToggleDeleteCommand}"
+                                AutomationProperties.Name="Delete ROM hack">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding DeleteButtonLabel}" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,16,0,0">
+            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}"
+                    Command="{Binding CancelCommand}" Content="Cancel" Margin="0,0,10,0"/>
+            <Button Grid.Column="2" Theme="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}"
+                    AutomationProperties.Name="Save ROM hack">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="&#xE74E;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Text="Save hack" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

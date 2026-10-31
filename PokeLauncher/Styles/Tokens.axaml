@@ -1,0 +1,51 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="BgBaseBrush" Color="#14141B"/>
+    <SolidColorBrush x:Key="SidebarBrush" Color="#0F0F16"/>
+    <SolidColorBrush x:Key="TopBarBrush" Color="#171720"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#1C1C26"/>
+    <SolidColorBrush x:Key="SurfaceAltBrush" Color="#252530"/>
+    <SolidColorBrush x:Key="SubtleBorderBrush" Color="#22FFFFFF"/>
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F2F2F7"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#99EBEBF5"/>
+    <SolidColorBrush x:Key="TextTertiaryBrush" Color="#66EBEBF5"/>
+
+    <!-- Accents (swappable at runtime from Settings) -->
+    <SolidColorBrush x:Key="AccentBrush" Color="#8B5CF6"/>
+    <SolidColorBrush x:Key="AccentSoftBrush" Color="#298B5CF6"/>
+    <SolidColorBrush x:Key="AccentBorderBrush" Color="#668B5CF6"/>
+    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#8B5CF6" Offset="0"/>
+        <GradientStop Color="#38BDF8" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Status / semantic -->
+    <SolidColorBrush x:Key="SuccessBrush" Color="#34D399"/>
+    <SolidColorBrush x:Key="EasyBrush" Color="#34D399"/>
+    <SolidColorBrush x:Key="MediumBrush" Color="#FBBF24"/>
+    <SolidColorBrush x:Key="HardBrush" Color="#FB923C"/>
+    <SolidColorBrush x:Key="VeryHardBrush" Color="#F87171"/>
+    <SolidColorBrush x:Key="CompleteBrush" Color="#34D399"/>
+    <SolidColorBrush x:Key="BetaBrush" Color="#FBBF24"/>
+    <SolidColorBrush x:Key="WipBrush" Color="#60A5FA"/>
+    <SolidColorBrush x:Key="DiscontinuedBrush" Color="#9CA3AF"/>
+    <SolidColorBrush x:Key="InfoBrush" Color="#60A5FA"/>
+    <SolidColorBrush x:Key="StarBrush" Color="#FFC53D"/>
+
+    <!-- Hero overlay: keeps text readable over cover art -->
+    <LinearGradientBrush x:Key="HeroOverlayBrush" StartPoint="0%,0%" EndPoint="100%,100%">
+        <GradientStop Color="#F014141B" Offset="0"/>
+        <GradientStop Color="#A614141B" Offset="0.55"/>
+        <GradientStop Color="#3314141B" Offset="1"/>
+    </LinearGradientBrush>
+
+    <!-- Icon font: Segoe Fluent Icons (Windows 11) with Segoe MDL2 Assets fallback (Windows 10) -->
+    <FontFamily x:Key="IconFont">Segoe Fluent Icons,Segoe MDL2 Assets</FontFamily>
+
+    <Thickness x:Key="PagePadding">28,22,28,28</Thickness>
+    <Thickness x:Key="CardPadding">16</Thickness>
+</ResourceDictionary>

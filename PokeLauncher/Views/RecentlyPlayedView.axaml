@@ -1,0 +1,37 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="PokeLauncher.Views.RecentlyPlayedView"
+             x:DataType="vm:RecentlyPlayedViewModel">
+
+    <DockPanel Margin="{StaticResource PagePadding}">
+        <StackPanel DockPanel.Dock="Top" Spacing="2">
+            <TextBlock Text="Recently Played" Classes="page-title"/>
+            <TextBlock Text="{Binding CountLabel}" Classes="secondary" FontSize="13"/>
+        </StackPanel>
+
+        <Panel Margin="0,16,0,0">
+            <ScrollViewer IsVisible="{Binding HasRecentGames}">
+                <ItemsControl ItemsSource="{Binding RecentGames}"
+                              ItemTemplate="{StaticResource GameCardTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+            <Border Classes="card" IsVisible="{Binding !HasRecentGames}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <TextBlock Text="Nothing played yet" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Once play tracking is connected to the emulator, your recent sessions will appear here."
+                               Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Panel>
+    </DockPanel>
+</UserControl>

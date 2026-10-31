@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:controls="using:PokeLauncher.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="900"
+             x:Class="PokeLauncher.Views.HackBrowserView"
+             x:DataType="vm:HackBrowserViewModel">
+
+    <DockPanel Margin="{StaticResource PagePadding}">
+
+        <!-- Header + toolbar -->
+        <StackPanel DockPanel.Dock="Top" Spacing="14">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="2">
+                    <TextBlock Text="ROM Hack Browser" Classes="page-title"/>
+                    <TextBlock Text="{Binding CountWords}" Classes="secondary" FontSize="13"/>
+                </StackPanel>
+                <Button Grid.Column="1" Theme="{StaticResource PrimaryButton}"
+                        Command="{Binding CreateHackCommand}"
+                        AutomationProperties.Name="Add a ROM hack">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center"/>
+                        <TextBlock Text="Add ROM hack" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasHacks}">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="140"
+                              ItemsSource="{Binding GenerationOptions}"
+                              SelectedItem="{Binding SelectedGeneration, Mode=TwoWay}"
+                              AutomationProperties.Name="Filter by generation">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:GenOption">
+                                <TextBlock Text="{Binding Label}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="150"
+                              ItemsSource="{Binding BaseGameOptions}"
+                              SelectedItem="{Binding SelectedBaseGame, Mode=TwoWay}"
+                              AutomationProperties.Name="Filter by base game"/>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="130"
+                              ItemsSource="{Binding GenreOptions}"
+                              SelectedItem="{Binding SelectedGenre, Mode=TwoWay}"
+                              AutomationProperties.Name="Filter by genre"/>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="130"
+                              ItemsSource="{x:Static vm:FilterOptions.Difficulties}"
+                              SelectedItem="{Binding SelectedDifficulty, Mode=TwoWay}"
+                              AutomationProperties.Name="Filter by difficulty"/>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="140"
+                              ItemsSource="{x:Static vm:FilterOptions.Statuses}"
+                              SelectedItem="{Binding SelectedStatus, Mode=TwoWay}"
+                              AutomationProperties.Name="Filter by status"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding CountLabel}" Classes="secondary" FontSize="12" VerticalAlignment="Center"/>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="140"
+                              ItemsSource="{Binding SortOptions}"
+                              SelectedItem="{Binding SelectedSort, Mode=TwoWay}"
+                              AutomationProperties.Name="Sort hacks">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:HackSortOption">
+                                <TextBlock Text="{Binding Label}"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button Theme="{StaticResource SecondaryButton}" Command="{Binding ClearFiltersCommand}"
+                            Content="Clear filters" Padding="12,6" FontSize="12"/>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- Results -->
+        <Panel Margin="0,16,0,0">
+            <ScrollViewer IsVisible="{Binding HasResults}">
+                <ItemsControl ItemsSource="{Binding FilteredHacks}"
+                              ItemTemplate="{StaticResource HackCardTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+            <Border Classes="card" IsVisible="{Binding !HasResults}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="520">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <TextBlock Text="No ROM hacks here yet" FontWeight="SemiBold" HorizontalAlignment="Center"
+                               IsVisible="{Binding HasHacks}"/>
+                    <TextBlock Text="Your hack library is empty" FontWeight="SemiBold" HorizontalAlignment="Center"
+                               IsVisible="{Binding !HasHacks}"/>
+                    <TextBlock Text="Add the fan-made projects you play: give each hack a name, pick its base game, and attach the patched ROM file. PokeLauncher launches it through the base game's emulator — it does not download or patch hacks."
+                               Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                    <Button Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center"
+                            Command="{Binding CreateHackCommand}"
+                            AutomationProperties.Name="Add your first ROM hack">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="Add your first ROM hack" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </Panel>
+    </DockPanel>
+</UserControl>

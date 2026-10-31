@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:PokeLauncher.Controls"
+             x:Class="PokeLauncher.Controls.CoverPlaceholder"
+             x:CompileBindings="False">
+    <!--
+      Polished placeholder cover art: generation-colored gradient, subtle Poké Ball
+      watermark, and optional title/subtitle text. No remote images required.
+    -->
+    <Border CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=UserControl}}">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                <GradientStop Color="{Binding FromColor, RelativeSource={RelativeSource AncestorType=UserControl}}" Offset="0"/>
+                <GradientStop Color="{Binding ToColor, RelativeSource={RelativeSource AncestorType=UserControl}}" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+        <Panel>
+            <controls:PokeBallMark
+                Width="{Binding BallSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Height="{Binding BallSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Opacity="{Binding BallOpacity, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <StackPanel IsVisible="{Binding ShowText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        Margin="14,12" VerticalAlignment="Bottom" Spacing="2">
+                <TextBlock Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontSize="{Binding TitleFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                <TextBlock Text="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                           FontSize="11" Opacity="0.85" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+        </Panel>
+    </Border>
+</UserControl>

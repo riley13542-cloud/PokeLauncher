@@ -1,0 +1,112 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="using:PokeLauncher.ViewModels"
+                    xmlns:controls="using:PokeLauncher.Controls"
+                    xmlns:conv="using:Avalonia.Data.Converters">
+
+    <!-- Game card: grid view, Home rows, Favorites, Recently Played, Collections -->
+    <DataTemplate x:Key="GameCardTemplate" x:DataType="vm:GameViewModel">
+        <Panel Width="176" Margin="0,0,14,14">
+            <Button Theme="{StaticResource CardButton}" Command="{Binding OpenCommand}"
+                    AutomationProperties.Name="{Binding Title}">
+                <StackPanel>
+                    <controls:GameCover Width="176" Height="208" Game="{Binding}"
+                                               Title="{Binding Title}"
+                                               Subtitle="{Binding Platform}"
+                                               FromColor="{Binding CoverFrom}"
+                                               ToColor="{Binding CoverTo}"
+                                               CornerRadius="12,12,0,0"
+                                               TitleFontSize="14"
+                                               BallSize="52"/>
+                    <StackPanel Margin="11,10,11,12" Spacing="3">
+                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding MetaLine}" Classes="tertiary"/>
+                        <TextBlock Text="{Binding PlayInfoText}" FontSize="11"
+                                   Foreground="{DynamicResource InfoBrush}"
+                                   IsVisible="{Binding PlayInfoText, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+            <ToggleButton Theme="{StaticResource StarToggleButton}"
+                          IsChecked="{Binding IsFavorite, Mode=TwoWay}"
+                          HorizontalAlignment="Right" VerticalAlignment="Top"
+                          Margin="0,8,8,0"
+                          AutomationProperties.Name="Favorite"/>
+        </Panel>
+    </DataTemplate>
+
+    <!-- Game row: list view -->
+    <DataTemplate x:Key="GameRowTemplate" x:DataType="vm:GameViewModel">
+        <Button Theme="{StaticResource CardButton}" Command="{Binding OpenCommand}" Margin="0,0,0,8"
+                AutomationProperties.Name="{Binding Title}">
+            <Grid ColumnDefinitions="52,*,Auto,Auto" Margin="8" VerticalAlignment="Center">
+                <controls:GameCover Width="52" Height="64" Game="{Binding}"
+                                           FromColor="{Binding CoverFrom}"
+                                           ToColor="{Binding CoverTo}"
+                                           CornerRadius="8"
+                                           ShowText="False"
+                                           BallSize="22"/>
+                <StackPanel Grid.Column="1" Margin="12,0" Spacing="2" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding MetaLine}" Classes="tertiary"/>
+                </StackPanel>
+                <TextBlock Grid.Column="2" Text="{Binding PlayInfoText}" Classes="tertiary"
+                           VerticalAlignment="Center" Margin="0,0,12,0"
+                           IsVisible="{Binding PlayInfoText, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+                <ToggleButton Grid.Column="3" Theme="{StaticResource StarToggleButton}"
+                              IsChecked="{Binding IsFavorite, Mode=TwoWay}"
+                              AutomationProperties.Name="Favorite"/>
+            </Grid>
+        </Button>
+    </DataTemplate>
+
+    <!-- ROM hack card: browser grid + Home discovery row -->
+    <DataTemplate x:Key="HackCardTemplate" x:DataType="vm:RomHackViewModel">
+        <Panel Width="272" Margin="0,0,14,14">
+            <Button Theme="{StaticResource CardButton}" Command="{Binding OpenCommand}"
+                AutomationProperties.Name="{Binding Title}">
+                <StackPanel>
+                    <controls:CoverPlaceholder Width="272" Height="126"
+                                               Title="{Binding Title}"
+                                               Subtitle="{Binding BaseGameTitle}"
+                                               FromColor="{Binding CoverFrom}"
+                                               ToColor="{Binding CoverTo}"
+                                               CornerRadius="12,12,0,0"
+                                               TitleFontSize="15"
+                                               BallSize="44"/>
+                    <StackPanel Margin="12,10,12,12" Spacing="7">
+                        <TextBlock Text="{Binding Description}" FontSize="11.5" Opacity="0.75"
+                                   TextWrapping="Wrap" TextTrimming="WordEllipsis"
+                                   Height="30" LineHeight="15"/>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Border Classes="chip"
+                                    Classes.easy="{Binding IsEasy}"
+                                    Classes.medium="{Binding IsMedium}"
+                                    Classes.hard="{Binding IsHard}"
+                                    Classes.very-hard="{Binding IsVeryHard}">
+                                <TextBlock Text="{Binding Difficulty}"/>
+                            </Border>
+                            <Border Classes="chip">
+                                <TextBlock Text="{Binding Genre}"/>
+                            </Border>
+                            <Border Classes="chip"
+                                    Classes.complete="{Binding IsComplete}"
+                                    Classes.beta="{Binding IsBeta}"
+                                    Classes.wip="{Binding IsWip}"
+                                    Classes.discontinued="{Binding IsDiscontinued}">
+                                <TextBlock Text="{Binding Status}"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding MetaLine}" Classes="tertiary"/>
+                    </StackPanel>
+                </StackPanel>
+            </Button>
+            <ToggleButton Theme="{StaticResource StarToggleButton}"
+                          IsChecked="{Binding IsBookmarked, Mode=TwoWay}"
+                          HorizontalAlignment="Right" VerticalAlignment="Top"
+                          Margin="0,8,8,0"
+                          AutomationProperties.Name="Bookmark"/>
+        </Panel>
+    </DataTemplate>
+</ResourceDictionary>

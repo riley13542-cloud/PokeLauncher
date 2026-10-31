@@ -1,0 +1,101 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PokeLauncher.ViewModels"
+        xmlns:conv="using:Avalonia.Data.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="680" d:DesignHeight="620"
+        x:Class="PokeLauncher.Views.ImportGamesDialog"
+        x:DataType="vm:ImportGamesDialogViewModel"
+        Title="Import games"
+        Width="680" Height="620" MinWidth="560" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="True"
+        Background="{DynamicResource BgBaseBrush}"
+        FontFamily="fonts:Inter#Inter,Segoe UI">
+
+    <Grid Margin="22" RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,14">
+            <TextBlock Text="Import games" FontSize="19" FontWeight="Bold"/>
+            <TextBlock Text="Files you picked are reviewed below. PokeLauncher guesses each game's system from the file extension and links files whose names match games already in your library — correct anything that looks wrong before importing."
+                       Classes="secondary" FontSize="12" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Rows -->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="8">
+                <ItemsControl ItemsSource="{Binding Rows}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ImportRowViewModel">
+                            <Border Background="{DynamicResource SurfaceBrush}"
+                                    BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                    BorderThickness="1" CornerRadius="10" Padding="14,12">
+                                <StackPanel Spacing="9">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <StackPanel Spacing="2">
+                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" FontSize="13"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip.Tip="{Binding FilePath}"/>
+                                            <TextBlock Text="{Binding Note}" FontSize="11.5"
+                                                       Foreground="{DynamicResource InfoBrush}" TextWrapping="Wrap"
+                                                       IsVisible="{Binding Note, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+                                        </StackPanel>
+                                        <Border Grid.Column="1" Classes="chip"
+                                                Classes.ok="{Binding IsImportable}"
+                                                VerticalAlignment="Top">
+                                            <TextBlock Text="{Binding StatusText}"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Editable details for brand-new entries -->
+                                    <StackPanel Spacing="8" IsVisible="{Binding IsTitleEditable}">
+                                        <TextBox Text="{Binding Title, Mode=TwoWay}"
+                                                 MinHeight="34" VerticalContentAlignment="Center"
+                                                 PlaceholderText="Game title"
+                                                 AutomationProperties.Name="Game title"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="180"
+                                                      ItemsSource="{Binding PlatformChoices}"
+                                                      SelectedItem="{Binding Platform, Mode=TwoWay}"
+                                                      AutomationProperties.Name="Platform"/>
+                                            <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="160"
+                                                      ItemsSource="{Binding GenerationChoices}"
+                                                      SelectedItem="{Binding SelectedGeneration, Mode=TwoWay}"
+                                                      AutomationProperties.Name="Generation">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate x:DataType="vm:GenOption">
+                                                        <TextBlock Text="{Binding Label}"/>
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,14,0,0">
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+                <TextBlock Text="{Binding SummaryText}" Classes="secondary" FontSize="12"/>
+                <TextBlock Text="Imported files are copied into PokeLauncher's library folder — your originals are never moved or modified."
+                           Classes="tertiary" FontSize="11.5" TextWrapping="Wrap"/>
+            </StackPanel>
+            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}"
+                    Command="{Binding CancelCommand}" Content="Cancel" Margin="0,0,10,0"/>
+            <Button Grid.Column="2" Theme="{StaticResource PrimaryButton}"
+                    Command="{Binding ConfirmCommand}" IsEnabled="{Binding HasImportable}"
+                    AutomationProperties.Name="Confirm import">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="&#xE8B5;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ConfirmButtonText}" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

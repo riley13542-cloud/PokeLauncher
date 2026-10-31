@@ -1,0 +1,182 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:controls="using:PokeLauncher.Controls"
+             xmlns:conv="using:Avalonia.Data.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="900"
+             x:Class="PokeLauncher.Views.HomeView"
+             x:DataType="vm:HomeViewModel">
+
+    <ScrollViewer Padding="{StaticResource PagePadding}">
+        <StackPanel Spacing="26">
+
+            <!-- ============================ Hero ============================ -->
+            <Border Classes="card" Padding="0" CornerRadius="16" Height="320"
+                    BoxShadow="0 10 30 0 #40000000">
+                <Panel>
+                    <controls:GameCover Game="{Binding FeaturedGame}"
+                        FromColor="{Binding FeaturedGame.CoverFrom}"
+                        ToColor="{Binding FeaturedGame.CoverTo}"
+                        ShowText="False" BallSize="210" BallOpacity="0.45"/>
+                    <Border Background="{DynamicResource HeroOverlayBrush}"/>
+                    <StackPanel Margin="34" VerticalAlignment="Center" Spacing="10"
+                                HorizontalAlignment="Left" MaxWidth="660">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Classes="chip"><TextBlock Text="{Binding FeaturedGame.GenerationLabel}"/></Border>
+                            <Border Classes="chip"><TextBlock Text="{Binding FeaturedGame.Platform}"/></Border>
+                            <Border Classes="chip" Classes.ok="{Binding FeaturedGame.HasRom}">
+                                <TextBlock Text="{Binding FeaturedGame.RomFileStatus}"/>
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Text="{Binding FeaturedGame.Title}" FontSize="34" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding FeaturedGame.Description}" FontSize="13"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                            <Button Theme="{StaticResource PrimaryButton}" Command="{Binding PlayFeaturedCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="9">
+                                    <TextBlock Text="&#xE768;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="15" VerticalAlignment="Center"/>
+                                    <TextBlock Text="Play" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Theme="{StaticResource SecondaryButton}" Command="{Binding ViewFeaturedDetailsCommand}">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}"
+                                               FontSize="13" VerticalAlignment="Center"/>
+                                    <TextBlock Text="View Details" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Panel>
+            </Border>
+
+            <!-- ======================= Continue Playing ===================== -->
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Continue Playing" Classes="section-title" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}"
+                            Command="{Binding OpenLibraryCommand}"
+                            AutomationProperties.Name="Open My Library"
+                            Padding="12,6" FontSize="12">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <TextBlock Text="&#xE8F1;" FontFamily="{StaticResource IconFont}" FontSize="13"/>
+                            <TextBlock Text="Open My Library"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <Panel>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                  IsVisible="{Binding HasContinuePlaying}">
+                        <ItemsControl ItemsSource="{Binding ContinuePlaying}"
+                                      ItemTemplate="{StaticResource GameCardTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <Border Classes="card" IsVisible="{Binding !HasContinuePlaying}">
+                        <StackPanel Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="Nothing played yet" FontWeight="SemiBold"/>
+                            <TextBlock Text="Games you play will appear here so you can pick up where you left off." Classes="secondary" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Panel>
+            </StackPanel>
+
+            <!-- ========================= Favorites ========================== -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Your Favorites" Classes="section-title"/>
+                <Panel>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                                  IsVisible="{Binding HasFavorites}">
+                        <ItemsControl ItemsSource="{Binding FavoriteGames}"
+                                      ItemTemplate="{StaticResource GameCardTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <Border Classes="card" IsVisible="{Binding !HasFavorites}">
+                        <StackPanel Spacing="4" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="No favorites yet" FontWeight="SemiBold"/>
+                            <TextBlock Text="Tap the star on any game card and it will show up here." Classes="secondary" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Panel>
+            </StackPanel>
+
+            <!-- ====================== Discover ROM Hacks ==================== -->
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Discover ROM Hacks" Classes="section-title" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}"
+                            Command="{Binding OpenHackBrowserCommand}"
+                            AutomationProperties.Name="Open ROM Hack Browser"
+                            Padding="12,6" FontSize="12">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <TextBlock Text="&#xE774;" FontFamily="{StaticResource IconFont}" FontSize="13"/>
+                            <TextBlock Text="Open ROM Hack Browser"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding FeaturedHacks}"
+                                  ItemTemplate="{StaticResource HackCardTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+            </StackPanel>
+
+            <!-- ====================== Quick Library Stats =================== -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="Quick Library Stats" Classes="section-title"/>
+                <Grid ColumnDefinitions="*,14,*,14,*,14,*">
+                    <Border Classes="stat-tile">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="&#xE8F1;" FontFamily="{StaticResource IconFont}" FontSize="17"
+                                       Foreground="{DynamicResource AccentBrush}"/>
+                            <TextBlock Text="{Binding Stats.TotalGames}" FontSize="26" FontWeight="Bold"/>
+                            <TextBlock Text="Total games" Classes="secondary" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Classes="stat-tile">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="&#xE735;" FontFamily="{StaticResource IconFont}" FontSize="17"
+                                       Foreground="{DynamicResource StarBrush}"/>
+                            <TextBlock Text="{Binding Stats.FavoriteCount}" FontSize="26" FontWeight="Bold"/>
+                            <TextBlock Text="Favorites" Classes="secondary" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="4" Classes="stat-tile">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="&#xE768;" FontFamily="{StaticResource IconFont}" FontSize="17"
+                                       Foreground="{DynamicResource SuccessBrush}"/>
+                            <TextBlock Text="{Binding Stats.PlayedCount}" FontSize="26" FontWeight="Bold"/>
+                            <TextBlock Text="Games played" Classes="secondary" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="6" Classes="stat-tile">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="&#xE774;" FontFamily="{StaticResource IconFont}" FontSize="17"
+                                       Foreground="{DynamicResource InfoBrush}"/>
+                            <TextBlock Text="{Binding Stats.HackCount}" FontSize="26" FontWeight="Bold"/>
+                            <TextBlock Text="ROM hacks saved" Classes="secondary" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,287 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:conv="using:Avalonia.Data.Converters"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="1000"
+             x:Class="PokeLauncher.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <ScrollViewer Padding="{StaticResource PagePadding}">
+        <StackPanel Spacing="18" MaxWidth="760" HorizontalAlignment="Left">
+
+            <StackPanel Spacing="2">
+                <TextBlock Text="Settings" Classes="page-title"/>
+                <TextBlock Text="{Binding HeaderSubtitle}" Classes="secondary" FontSize="13"/>
+            </StackPanel>
+
+            <Border Classes="info-strip">
+                <StackPanel Orientation="Horizontal" Spacing="9">
+                    <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                               Foreground="{DynamicResource MediumBrush}" VerticalAlignment="Center"
+                               IsVisible="{Binding HasLoadError}"/>
+                    <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                               Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Center"
+                               IsVisible="{Binding !HasLoadError}"/>
+                    <TextBlock Text="{Binding PersistenceNote}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <Border Classes="info-strip" IsVisible="{Binding HasStatusMessage}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Theme="{StaticResource GhostIconButton}"
+                            Content="&#xE711;" Margin="8,0,0,0"
+                            AutomationProperties.Name="Dismiss settings message"
+                            Command="{Binding ClearStatusCommand}"/>
+                </Grid>
+            </Border>
+
+            <!-- ============================ Appearance ============================ -->
+            <Border Classes="card">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="Appearance" Classes="section-title"/>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Accent color" Classes="group-label"/>
+                        <ItemsControl ItemsSource="{Binding AccentOptions}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="10"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:AccentOption">
+                                    <Button Theme="{StaticResource SecondaryButton}"
+                                            Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).ApplyAccentCommand}"
+                                            CommandParameter="{Binding}"
+                                            Padding="4" Width="40" Height="40"
+                                            AutomationProperties.Name="{Binding AutomationName}"
+                                            ToolTip.Tip="{Binding Name}">
+                                        <Panel>
+                                            <Border Width="26" Height="26" CornerRadius="13" Background="{Binding FromBrush}"/>
+                                            <Border Width="26" Height="26" CornerRadius="13"
+                                                    BorderBrush="{DynamicResource TextPrimaryBrush}" BorderThickness="2"
+                                                    IsVisible="{Binding IsSelected}"/>
+                                        </Panel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="The accent recolors highlights, buttons, and selection indicators right away."
+                                   Classes="tertiary"/>
+                    </StackPanel>
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Default library view" Classes="group-label"/>
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <RadioButton GroupName="DefaultLibraryView"
+                                         Theme="{StaticResource ChipToggleButton}"
+                                         Content="Grid"
+                                         IsChecked="{Binding DefaultLibraryGridView, Mode=TwoWay}"/>
+                            <RadioButton GroupName="DefaultLibraryView"
+                                         Theme="{StaticResource ChipToggleButton}"
+                                         Content="List"
+                                         IsChecked="{Binding !DefaultLibraryGridView, Mode=TwoWay}"/>
+                        </StackPanel>
+                        <TextBlock Text="Applies to My Library immediately." Classes="tertiary"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ======================== Managed library =========================== -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Managed library" Classes="section-title"/>
+                    <TextBlock Text="Imported ROMs are copied into PokeLauncher's own data folder — your original files are never moved or modified. Emulators save next to each managed ROM, and PokeLauncher snapshots those saves before every launch. You can also drop ROM files into the ROMs\Inbox folder and attach them to built-in games with one click (My Library → Check ROM inbox)."
+                               Classes="secondary" FontSize="12" TextWrapping="Wrap"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="ROM library (managed copies)" Classes="group-label"/>
+                            <TextBlock Text="{Binding RomsFolderPath}" FontSize="11.5" TextWrapping="Wrap"/>
+                            <TextBlock Text="Save backups" Classes="group-label" Margin="0,8,0,0"/>
+                            <TextBlock Text="{Binding SavesFolderPath}" FontSize="11.5" TextWrapping="Wrap"/>
+                                    <TextBlock Text="ROM inbox" Classes="group-label" Margin="0,8,0,0"/>
+                            <TextBlock Text="Drop your own game files here and use My Library → Check ROM inbox. Name them after the built-in game — e.g. “Pokemon Emerald (U).gba” or “pokemon red.gb” (matching is by title; region tags like (U)/(E) are ignored)."
+                                       FontSize="11.5" TextWrapping="Wrap"/>
+                            <TextBlock Text="Cover art" Classes="group-label" Margin="0,8,0,0"/>
+                            <TextBlock Text="Name it after the game’s id — e.g. emerald.png, red.jpg, crystal.webp. Easiest way: a game’s page → Set cover art. Or place “Emerald.png” next to the ROM file when importing and it is picked up automatically."
+                                       FontSize="11.5" TextWrapping="Wrap"/>
+                            <TextBlock Text="Drop your own logo.png into %LocalAppData%\PokeLauncher to replace the built-in emblem everywhere (sidebar, window and taskbar icon). Applies on the next app start."
+                                       FontSize="11.5" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Vertical" Spacing="8" VerticalAlignment="Top" Margin="12,0,0,0">
+                            <Button Theme="{StaticResource SecondaryButton}" Padding="10,5" FontSize="12"
+                                    Command="{Binding OpenFolderCommand}" CommandParameter="{Binding RomsFolderPath}"
+                                    AutomationProperties.Name="Open the ROM library folder">Open ROMs folder</Button>
+                            <Button Theme="{StaticResource SecondaryButton}" Padding="10,5" FontSize="12"
+                                    Command="{Binding OpenFolderCommand}" CommandParameter="{Binding SavesFolderPath}"
+                                    AutomationProperties.Name="Open the save backups folder">Open Saves folder</Button>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Save backup retention ======================== -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Save backups" Classes="section-title"/>
+                    <TextBlock Text="PokeLauncher snapshots your saves before every launch and keeps the most recent snapshots per game."
+                               Classes="secondary" FontSize="12" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Snapshots kept per game" VerticalAlignment="Center"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="140"
+                                  ItemsSource="{Binding BackupRetentionOptions}"
+                                  SelectedItem="{Binding SelectedBackupRetention, Mode=TwoWay}"
+                                  AutomationProperties.Name="Save backups kept per game">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:BackupRetentionOption">
+                                    <TextBlock Text="{Binding Value, StringFormat='{}{0} snapshots'}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- ===================== Emulator configuration ======================= -->
+            <Border Classes="card">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="Emulators" Classes="section-title"/>
+                    <TextBlock Text="Point each console at an emulator already on this PC, or download the official build right from the emulator's own project — verified by SHA-256, extracted locally, then wired up automatically. No mirrors, no bundles."
+                               Classes="tertiary" TextWrapping="Wrap"/>
+                    <Border Classes="info-strip" IsVisible="{Binding HasDownloadWarnings}">
+                        <StackPanel Orientation="Horizontal" Spacing="9">
+                            <TextBlock Text="&#xE7BA;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                       Foreground="{DynamicResource MediumBrush}" VerticalAlignment="Center"/>
+                            <StackPanel>
+                                <TextBlock Text="{Binding DownloadWarningsText}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <ItemsControl ItemsSource="{Binding EmulatorSystemOptions}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:EmulatorSystemViewModel">
+                                <Border Background="{DynamicResource SurfaceBrush}"
+                                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                        BorderThickness="1" CornerRadius="10" Padding="14,12" Margin="0,0,0,8">
+                                    <StackPanel Spacing="9">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="13"/>
+                                            <Border Classes="chip" Classes.ok="{Binding IsConfigured}">
+                                                <TextBlock Text="Configured" />
+                                            </Border>
+                                            <Border Classes="chip" IsVisible="{Binding !IsConfigured}">
+                                                <TextBlock Text="Not configured"/>
+                                            </Border>
+                                            <Border Classes="chip accent" IsVisible="{Binding HasOfficialChip}">
+                                                <TextBlock Text="{Binding OfficialChipText}"/>
+                                            </Border>
+                                            <TextBlock Text="{Binding FileHint}" Classes="tertiary" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <TextBox Text="{Binding ExecutablePath, Mode=TwoWay}" MinHeight="34"
+                                                     PlaceholderText="Path to the emulator .exe"
+                                                     VerticalContentAlignment="Center"/>
+                                            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}"
+                                                    Command="{Binding $parent[ItemsControl].((vm:SettingsViewModel)DataContext).BrowseEmulatorExecutableCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Content="Browse…" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <TextBox Text="{Binding Arguments, Mode=TwoWay}" MinHeight="34"
+                                                 PlaceholderText="Launch arguments, e.g. --fullscreen {rom}"
+                                                 VerticalContentAlignment="Center"/>
+
+                                        <!-- ============ official build download section ============ -->
+                                        <StackPanel Spacing="8" IsVisible="{Binding HasDownloadOption}">
+                                            <TextBlock Text="{Binding InstallStatusText}" Classes="tertiary" TextWrapping="Wrap"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding IsBusy}">
+                                                <ProgressBar Value="{Binding DownloadPercent, Mode=OneWay}" Maximum="100"
+                                                             MinWidth="240" Height="6" VerticalAlignment="Center"/>
+                                                <Button Theme="{StaticResource SecondaryButton}" Content="Cancel"
+                                                        Command="{Binding CancelInstallCommand}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding CanOfferDownload}">
+                                                <Button Theme="{StaticResource SecondaryButton}"
+                                                        Content="Download official build…"
+                                                        AutomationProperties.Name="{Binding DownloadButtonAutomationName}"
+                                                        Command="{Binding ShowDownloadConsentCommand}"/>
+                                            </StackPanel>
+                                            <!-- consent panel: nothing downloads until this is confirmed -->
+                                            <Border Classes="info-strip" Padding="12,10"
+                                                    IsVisible="{Binding IsConfirmOpen}">
+                                                <StackPanel Spacing="8">
+                                                    <TextBlock Text="{Binding DownloadSummary}" Classes="secondary" FontSize="12.5" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="Downloaded straight from the emulator's official site, verified by SHA-256, and extracted to PokeLauncher's own emulator folder. Nothing is downloaded unless you confirm."
+                                                               Classes="tertiary" TextWrapping="Wrap"/>
+                                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                                        <Button Theme="{StaticResource PrimaryButton}"
+                                                                Command="{Binding ConfirmDownloadCommand}"
+                                                                AutomationProperties.Name="{Binding ConfirmDownloadAutomationName}">
+                                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                                <TextBlock Text="{Binding DownloadName}"
+                                                                           AutomationProperties.Name="{Binding ConfirmDownloadAutomationName}" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                        </Button>
+                                                        <Button Theme="{StaticResource SecondaryButton}"
+                                                                Command="{Binding DeclineDownloadConsentCommand}" Content="Cancel"/>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+                                            <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding HasInstallRecord}">
+                                                <Button Theme="{StaticResource SecondaryButton}" Content="Remove installed build"
+                                                        AutomationProperties.Name="{Binding RemoveButtonAutomationName}"
+                                                        Command="{Binding RemoveInstallCommand}"
+                                                        ToolTip.Tip="Deletes the downloaded emulator and clears its configuration. Manually configured paths and your own copies elsewhere are never touched."/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding EmulatorNote}" Classes="tertiary" TextWrapping="Wrap"
+                                                       IsVisible="{Binding HasEmulatorNote}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Launching replaces {rom} with the game's ROM file path (quoted). If your arguments don't contain {rom}, the path is appended automatically."
+                               Classes="tertiary"/>
+                    <TextBlock Text="Downloaded emulators run under their own licenses (mGBA MPL-2.0, melonDS GPL-3.0). See THIRD-PARTY-NOTICES.md for the full list and links; PokeLauncher never bundles or edits their code."
+                               Classes="tertiary" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ======================== Cover-art preferences ===================== -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Cover art" Classes="section-title"/>
+                    <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="280" HorizontalAlignment="Left"
+                              ItemsSource="{Binding CoverArtOptions}"
+                              SelectedItem="{Binding SelectedCoverArt, Mode=TwoWay}"/>
+                    <TextBlock Text="{Binding CoverArtNote}" Classes="tertiary"
+                               IsVisible="{Binding CoverArtNote, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"
+                               TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ============================ Data storage =========================== -->
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="Data storage" Classes="section-title"/>
+                    <TextBlock Text="PokeLauncher stores your library, favorites, bookmarks, and settings in a local SQLite database:" Classes="secondary" FontSize="12" />
+                    <TextBlock Text="{Binding DataLocation}" FontSize="11.5" TextWrapping="Wrap"/>
+                    <TextBlock Text="ROM files themselves live in the managed library folder (see above), not in this database — it records where each one is. Removing a game deletes its library entry and PokeLauncher's managed copy; your original files are never touched."
+                               Classes="tertiary" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ============================== About =============================== -->
+            <Border Classes="card">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="About PokeLauncher" Classes="section-title"/>
+                    <TextBlock Text="Local library + persistence · mock catalog data · no ROMs or emulators included" Classes="secondary" FontSize="12"/>
+                    <TextBlock Text="See the About page in the sidebar for the full feature status."
+                               Classes="tertiary"/>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

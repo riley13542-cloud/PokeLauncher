@@ -1,0 +1,45 @@
+﻿{
+  "schemaVersion": 1,
+  "emulators": [
+    {
+      "id": "mgba",
+      "name": "mGBA",
+      "version": "0.10.5",
+      "systems": ["GB", "GBC", "GBA"],
+      "description": "One emulator covers Game Boy, Game Boy Color, and Game Boy Advance. Portable build, no installer required.",
+      "license": "MPL-2.0",
+      "licenseUrl": "https://www.mozilla.org/en-US/MPL/2.0/",
+      "sourceUrl": "https://github.com/mgba-emu/mgba",
+      "homepageUrl": "https://mgba.io",
+      "download": {
+        "url": "https://github.com/mgba-emu/mgba/releases/download/0.10.5/mGBA-0.10.5-win64.7z",
+        "sha256": "b497a57c7d9093834dadc64f33a90f7c411439c21fdb8a0143255a45ea37563a",
+        "sizeBytes": 14156919,
+        "format": "7z",
+        "executablePathInArchive": "mGBA-0.10.5-win64/mGBA.exe",
+        "launchArguments": "{rom}"
+      },
+      "note": null
+    },
+    {
+      "id": "melonds",
+      "name": "melonDS",
+      "version": "1.1",
+      "systems": ["NDS"],
+      "description": "Nintendo DS emulator focused on accuracy and speed. Requires BIOS dumps from your own console before DS games can run.",
+      "license": "GPL-3.0",
+      "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html",
+      "sourceUrl": "https://github.com/melonDS-emu/melonDS",
+      "homepageUrl": "https://melonds.kuribo64.net",
+      "download": {
+        "url": "https://github.com/melonDS-emu/melonDS/releases/download/1.1/melonDS-1.1-windows-x86_64.zip",
+        "sha256": "9f3f8a244103be20b5b657af5b0ed1b2a66bb20a7181476a6d294c9a53d4f8c8",
+        "sizeBytes": 19484283,
+        "format": "zip",
+        "executablePathInArchive": "melonDS.exe",
+        "launchArguments": "{rom}"
+      },
+      "note": "melonDS cannot run DS games out of the box: it needs BIOS dumps (bios7.bin and bios9.bin, plus firmware.bin for the console's firmware menu) from a Nintendo DS, DSi, or 3DS that you own. PokeLauncher never downloads these copyrighted files — you must dump them yourself and select them in melonDS's own settings. Until then, DS games will not boot."
+    }
+  ]
+}

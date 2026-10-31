@@ -1,0 +1,27 @@
+# --- Build outputs ---
+[PokeLauncher]/[Bb]in/
+[PokeLauncher]/[Oo]bj/
+[PokeLauncher]/gen/
+[Bb]in/
+[Oo]bj/
+[TestResults/]
+
+# --- IDE / editor ---
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- Installer / release artifacts (built by setup\build-installer.ps1) ---
+setup/installer/
+
+# --- Local safety-net backups (full source snapshots; too large for the repo) ---
+Backups/
+
+# --- OS / temp ---
+Thumbs.db
+.DS_Store
+*.log
+$env:TEMP/

@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="PokeLauncher.Views.CollectionsView"
+             x:DataType="vm:CollectionsViewModel">
+
+    <DockPanel Margin="{StaticResource PagePadding}">
+        <StackPanel DockPanel.Dock="Top" Spacing="14">
+            <StackPanel Spacing="2">
+                <TextBlock Text="Collections" Classes="page-title"/>
+                <TextBlock Text="{Binding CountLabel}" Classes="secondary" FontSize="13"/>
+            </StackPanel>
+
+            <StackPanel IsVisible="{Binding HasCollections}" Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ItemsControl ItemsSource="{Binding Collections}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CollectionViewModel">
+                                <RadioButton GroupName="PokeLauncherCollections"
+                                             Theme="{StaticResource ChipToggleButton}"
+                                             Content="{Binding Name}"
+                                             IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                             Command="{Binding SelectCommand}"/>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Theme="{StaticResource SecondaryButton}" Padding="10,5"
+                            Command="{Binding CreateCollectionCommand}"
+                            AutomationProperties.Name="Create a new collection">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="New collection" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding SelectedCollection.Description}" Classes="secondary" FontSize="12"
+                               TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}" Padding="10,5"
+                            Command="{Binding EditSelectedCommand}"
+                            AutomationProperties.Name="{Binding EditAutomationName}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <TextBlock Text="&#xE70F;" FontFamily="{StaticResource IconFont}" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="Edit…" FontSize="12" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <!-- No collections at all -->
+            <Border Classes="card" IsVisible="{Binding !HasCollections}" Padding="18">
+                <StackPanel Spacing="8" HorizontalAlignment="Center">
+                    <TextBlock Text="No collections yet" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Collections group games across your library — by region, replay queue, or anything you like."
+                               Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                    <Button Theme="{StaticResource PrimaryButton}" HorizontalAlignment="Center"
+                            Command="{Binding CreateCollectionCommand}"
+                            AutomationProperties.Name="Create your first collection">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="&#xE710;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="Create your first collection" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <Panel Margin="0,16,0,0">
+            <ScrollViewer IsVisible="{Binding HasGames}">
+                <ItemsControl ItemsSource="{Binding VisibleGames}"
+                              ItemTemplate="{StaticResource GameCardTemplate}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+            <Border Classes="card" IsVisible="{Binding !HasGames}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                <StackPanel Spacing="6" HorizontalAlignment="Center">
+                    <TextBlock Text="Nothing in this collection matches" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="Try a different search term, pick another collection, or use Edit… to add games."
+                               Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+        </Panel>
+    </DockPanel>
+</UserControl>

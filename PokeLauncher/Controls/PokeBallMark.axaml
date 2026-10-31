@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="PokeLauncher.Controls.PokeBallMark"
+             x:CompileBindings="False">
+    <!-- Vector Poké Ball mark drawn with simple shapes; scales via Viewbox. -->
+    <Viewbox Stretch="Uniform">
+        <Panel Width="48" Height="48">
+            <Ellipse Fill="#F4F4F8"/>
+            <Path Data="M 0,24 A 24,24 0 0 1 48,24 Z" Fill="#E5484D"/>
+            <Rectangle Width="48" Height="4" Fill="#17171E"/>
+            <Ellipse Width="15" Height="15" Fill="#17171E"/>
+            <Ellipse Width="7" Height="7" Fill="#F4F4F8"/>
+            <Ellipse Width="48" Height="48" Stroke="#17171E" StrokeThickness="3.2"/>
+        </Panel>
+    </Viewbox>
+</UserControl>

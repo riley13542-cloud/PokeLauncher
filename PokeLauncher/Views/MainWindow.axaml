@@ -1,0 +1,116 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PokeLauncher.ViewModels"
+        xmlns:controls="using:PokeLauncher.Controls"
+        xmlns:conv="using:Avalonia.Data.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="800"
+        x:Class="PokeLauncher.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/app-icon.ico"
+        Title="PokeLauncher"
+        Width="1280" Height="800" MinWidth="1024" MinHeight="640"
+        Background="{DynamicResource BgBaseBrush}"
+        FontFamily="fonts:Inter#Inter,Segoe UI">
+
+    <Grid ColumnDefinitions="248,*">
+
+        <!-- ============================ Sidebar ============================ -->
+        <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}"
+                BorderBrush="{DynamicResource SubtleBorderBrush}" BorderThickness="0,0,1,0">
+            <DockPanel Margin="0,18,0,14">
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="20,0,20,24">
+                    <Image Source="{Binding BrandLogo}" Width="32" Height="32"/>
+                    <TextBlock Text="PokeLauncher" FontSize="17" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding SidebarNav}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:NavItemViewModel">
+                            <RadioButton GroupName="PokeLauncherNav"
+                                         Theme="{StaticResource SidebarNavRadioButton}"
+                                         Content="{Binding DisplayName}"
+                                         Tag="{Binding IconGlyph}"
+                                         IsChecked="{Binding IsCurrent, Mode=TwoWay}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding FooterNav}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:NavItemViewModel">
+                            <RadioButton GroupName="PokeLauncherNav"
+                                         Theme="{StaticResource SidebarNavRadioButton}"
+                                         Content="{Binding DisplayName}"
+                                         Tag="{Binding IconGlyph}"
+                                         IsChecked="{Binding IsCurrent, Mode=TwoWay}"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Panel/>
+            </DockPanel>
+        </Border>
+
+        <!-- ========================= Main region =========================== -->
+        <Grid Grid.Column="1" RowDefinitions="58,*">
+            <Border Grid.Row="0" Background="{DynamicResource TopBarBrush}"
+                    BorderBrush="{DynamicResource SubtleBorderBrush}" BorderThickness="0,0,0,1">
+                <Grid Margin="20,0" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" VerticalAlignment="Center">
+                    <Button Grid.Column="0" Theme="{StaticResource GhostIconButton}"
+                            Content="&#xE72B;"
+                            AutomationProperties.Name="Back"
+                            IsVisible="{Binding ShowBack}"
+                            Command="{Binding GoBackCommand}"
+                            Margin="0,0,10,0"/>
+                    <StackPanel Grid.Column="1" Spacing="1" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedPage.DisplayName}" FontSize="15" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding SelectedPage.HeaderSubtitle}" Classes="tertiary"
+                                   IsVisible="{Binding SelectedPage.HeaderSubtitle, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+                    </StackPanel>
+                    <TextBox Grid.Column="3" Theme="{StaticResource SearchTextBox}" Width="380"
+                             Text="{Binding SearchText, Mode=TwoWay}"
+                             PlaceholderText="Search games and hacks…"
+                             AutomationProperties.Name="Global search">
+                        <TextBox.InnerLeftContent>
+                            <TextBlock Text="&#xE721;" FontFamily="{StaticResource IconFont}" FontSize="13"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="11,0,0,0" VerticalAlignment="Center"/>
+                        </TextBox.InnerLeftContent>
+                    </TextBox>
+                    <Button Grid.Column="4" Theme="{StaticResource GhostIconButton}"
+                            Content="&#xE72C;"
+                            AutomationProperties.Name="Refresh"
+                            IsVisible="{Binding ShowRefresh}"
+                            Command="{Binding RefreshCommand}"
+                            Margin="10,0,0,0"/>
+                    <Button Grid.Column="5" Theme="{StaticResource GhostIconButton}"
+                            Content="&#xE713;"
+                            AutomationProperties.Name="Open settings"
+                            Command="{Binding OpenSettingsCommand}"
+                            Margin="10,0,0,0"/>
+                </Grid>
+            </Border>
+
+            <TransitioningContentControl Grid.Row="1" Content="{Binding SelectedPage}">
+                <TransitioningContentControl.PageTransition>
+                    <CrossFade Duration="0:0:0.16"/>
+                </TransitioningContentControl.PageTransition>
+            </TransitioningContentControl>
+
+            <!-- Honest feedback toast -->
+            <Border Grid.Row="1" Classes="toast"
+                    IsVisible="{Binding HasToast}"
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                    Margin="0,0,22,22" Padding="14,10">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <TextBlock Text="&#xE946;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                               Foreground="{DynamicResource InfoBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding ToastMessage}" FontSize="12" TextWrapping="Wrap"
+                               MaxWidth="440" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

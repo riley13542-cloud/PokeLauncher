@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:PokeLauncher.Controls"
+             x:Class="PokeLauncher.Controls.GameCover"
+             x:CompileBindings="False">
+    <!--
+      A game's cover: the custom cover image (Covers\<game-id>.png/.jpg/…) when one is
+      set and custom covers are enabled in Settings; otherwise the generated placeholder.
+    -->
+    <Panel>
+        <controls:CoverPlaceholder
+            Title="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            Subtitle="{Binding Subtitle, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            FromColor="{Binding FromColor, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            ToColor="{Binding ToColor, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            ShowText="{Binding ShowText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            TitleFontSize="{Binding TitleFontSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            BallSize="{Binding BallSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            BallOpacity="{Binding BallOpacity, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=UserControl}}"
+            IsVisible="{Binding ShowPlaceholder, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+        <Border CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                ClipToBounds="True"
+                IsVisible="{Binding ShowImage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Background="{DynamicResource SurfaceBrush}">
+            <Image Source="{Binding Game.CoverImage, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                   Stretch="UniformToFill"/>
+        </Border>
+    </Panel>
+</UserControl>

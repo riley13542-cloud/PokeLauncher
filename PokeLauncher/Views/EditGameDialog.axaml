@@ -1,0 +1,99 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:PokeLauncher.ViewModels"
+        xmlns:conv="using:Avalonia.Data.Converters"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="540" d:DesignHeight="620"
+        x:Class="PokeLauncher.Views.EditGameDialog"
+        x:DataType="vm:EditGameDialogViewModel"
+        Title="Edit game details"
+        Width="540" Height="620" MinWidth="460" MinHeight="520"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" CanResize="True"
+        Background="{DynamicResource BgBaseBrush}"
+        FontFamily="fonts:Inter#Inter,Segoe UI">
+
+    <Grid Margin="22" RowDefinitions="Auto,*,Auto,Auto">
+
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,14">
+            <TextBlock Text="Edit game details" FontSize="19" FontWeight="Bold"/>
+            <TextBlock Text="Changes are saved to your local library. The original ROM file is never touched."
+                       Classes="secondary" FontSize="12" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="12">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Title" Classes="group-label"/>
+                <TextBox Text="{Binding Title, Mode=TwoWay}" MinHeight="36" VerticalContentAlignment="Center"
+                         AutomationProperties.Name="Game title"/>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Platform" Classes="group-label"/>
+                <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="220" HorizontalAlignment="Left"
+                          ItemsSource="{Binding PlatformChoices}"
+                          SelectedItem="{Binding Platform, Mode=TwoWay}"
+                          AutomationProperties.Name="Platform"/>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Generation" Classes="group-label"/>
+                <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="220" HorizontalAlignment="Left"
+                          ItemsSource="{Binding GenerationChoices}"
+                          SelectedItem="{Binding SelectedGeneration, Mode=TwoWay}"
+                          AutomationProperties.Name="Generation">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate x:DataType="vm:GenOption">
+                            <TextBlock Text="{Binding Label}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <TextBlock Text="Description" Classes="group-label"/>
+                <TextBox Text="{Binding Description, Mode=TwoWay}" MinHeight="110"
+                         TextWrapping="Wrap" AcceptsReturn="True"
+                         AutomationProperties.Name="Description"/>
+            </StackPanel>
+            <StackPanel Spacing="6">
+                <TextBlock Text="ROM file" Classes="group-label"/>
+                <TextBlock Text="{Binding RomFileStatus}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Danger zone: imported games only -->
+        <Border Grid.Row="2" Classes="info-strip" Margin="0,12,0,0" IsVisible="{Binding IsImported}">
+            <StackPanel Spacing="8">
+                <TextBlock Text="This game was imported by you. Removing it deletes the library entry, PokeLauncher's managed ROM copy, and its save backups — your original imported file is never touched."
+                           Classes="tertiary" TextWrapping="Wrap"/>
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                    <Button Theme="{StaticResource SecondaryButton}"
+                            Command="{Binding ToggleRemoveCommand}"
+                            IsEnabled="{Binding IsImported}"
+                            AutomationProperties.Name="Remove game from library">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <TextBlock Text="&#xE74D;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding RemoveButtonLabel}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Theme="{StaticResource SecondaryButton}" Command="{Binding DetachRomCommand}"
+                            IsVisible="{Binding HasRom}"
+                            ToolTip.Tip="Keep the game but forget its ROM file — you can import another later.">
+                        Detach ROM file
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto,Auto" Margin="0,16,0,0">
+            <Button Grid.Column="1" Theme="{StaticResource SecondaryButton}"
+                    Command="{Binding CancelCommand}" Content="Cancel" Margin="0,0,10,0"/>
+            <Button Grid.Column="2" Theme="{StaticResource PrimaryButton}"
+                    Command="{Binding SaveCommand}" IsEnabled="{Binding CanSave}"
+                    AutomationProperties.Name="Save changes">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="&#xE74E;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center"/>
+                    <TextBlock Text="Save changes" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,146 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Shared class styles. Included via StyleInclude from App.axaml. -->
+
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="{StaticResource CardPadding}"/>
+    </Style>
+
+    <Style Selector="Border.stat-tile">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="Padding" Value="18"/>
+    </Style>
+
+    <Style Selector="Border.chip">
+        <Setter Property="CornerRadius" Value="999"/>
+        <Setter Property="Padding" Value="9,3"/>
+        <Setter Property="Background" Value="#2A2A38"/>
+        <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+        <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    <Style Selector="Border.chip TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+    <Style Selector="Border.chip.accent">
+        <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.accent TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.easy">
+        <Setter Property="Background" Value="#2234D399"/>
+        <Setter Property="BorderBrush" Value="#5534D399"/>
+    </Style>
+    <Style Selector="Border.chip.easy TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource EasyBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.medium">
+        <Setter Property="Background" Value="#22FBBF24"/>
+        <Setter Property="BorderBrush" Value="#55FBBF24"/>
+    </Style>
+    <Style Selector="Border.chip.medium TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource MediumBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.hard">
+        <Setter Property="Background" Value="#22FB923C"/>
+        <Setter Property="BorderBrush" Value="#55FB923C"/>
+    </Style>
+    <Style Selector="Border.chip.hard TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource HardBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.very-hard">
+        <Setter Property="Background" Value="#22F87171"/>
+        <Setter Property="BorderBrush" Value="#55F87171"/>
+    </Style>
+    <Style Selector="Border.chip.very-hard TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource VeryHardBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.complete">
+        <Setter Property="Background" Value="#2234D399"/>
+        <Setter Property="BorderBrush" Value="#5534D399"/>
+    </Style>
+    <Style Selector="Border.chip.complete TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource CompleteBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.beta">
+        <Setter Property="Background" Value="#22FBBF24"/>
+        <Setter Property="BorderBrush" Value="#55FBBF24"/>
+    </Style>
+    <Style Selector="Border.chip.beta TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource BetaBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.wip">
+        <Setter Property="Background" Value="#2260A5FA"/>
+        <Setter Property="BorderBrush" Value="#5560A5FA"/>
+    </Style>
+    <Style Selector="Border.chip.wip TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource WipBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.discontinued">
+        <Setter Property="Background" Value="#229CA3AF"/>
+        <Setter Property="BorderBrush" Value="#559CA3AF"/>
+    </Style>
+    <Style Selector="Border.chip.discontinued TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource DiscontinuedBrush}"/>
+    </Style>
+    <Style Selector="Border.chip.ok">
+        <Setter Property="Background" Value="#2234D399"/>
+        <Setter Property="BorderBrush" Value="#5534D399"/>
+    </Style>
+    <Style Selector="Border.chip.ok TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+    </Style>
+
+    <Style Selector="Border.info-strip">
+        <Setter Property="Background" Value="#1A60A5FA"/>
+        <Setter Property="BorderBrush" Value="#5560A5FA"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="10"/>
+        <Setter Property="Padding" Value="12,9"/>
+    </Style>
+    <Style Selector="Border.info-strip TextBlock">
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
+
+    <Style Selector="Border.toast">
+        <Setter Property="Background" Value="#F0171720"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="12"/>
+        <Setter Property="BoxShadow" Value="0 8 24 0 #66000000"/>
+    </Style>
+
+    <!-- Typography -->
+    <Style Selector="TextBlock.page-title">
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.section-title">
+        <Setter Property="FontSize" Value="17"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.group-label">
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.secondary">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+    </Style>
+    <Style Selector="TextBlock.tertiary">
+        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+</Styles>
