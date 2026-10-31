@@ -102,7 +102,9 @@ public partial class MainViewModel : ViewModelBase
             ApplyAccent,
             value => Library.IsGridView = value,
             retention => _saveBackups.Retention = retention,
-            ApplyCoverArtMode);
+            ApplyCoverArtMode,
+            StartPage => ApplyStartPage(StartPage),
+            notifyInbox => _notifyInbox = notifyInbox);
         About = new AboutViewModel();
         Home = new HomeViewModel(
             games, hackList, Stats,
@@ -152,7 +154,19 @@ public partial class MainViewModel : ViewModelBase
         BrandLogo = ManagedLibrary.LoadLogo();
         NotifyInboxIfPending();
         NotifyUpdateIfPending();
+        ApplyStartPage(Settings.SelectedStartPage);
     }
+
+    /// <summary>Whether to show the ROM-inbox toast at startup (Settings → Startup).</summary>
+    private bool _notifyInbox = true;
+
+    /// <summary>Navigates to the page PokeLauncher should open on (Settings → Startup).</summary>
+    private void ApplyStartPage(string pageKey) => NavigateTo(pageKey switch
+    {
+        "My Library" => Library,
+        "Recently Played" => RecentlyPlayed,
+        _ => Home,
+    });
 
     /// <summary>
     /// Startup update prompt: when the configured update source reports a newer version,
@@ -196,6 +210,10 @@ public partial class MainViewModel : ViewModelBase
     /// <summary>Startup hint: the user dropped ROM files into the managed inbox.</summary>
     private void NotifyInboxIfPending()
     {
+        if (!_notifyInbox)
+        {
+            return;
+        }
         try
         {
             if (!Directory.Exists(ManagedLibrary.InboxRoot))

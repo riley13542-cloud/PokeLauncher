@@ -143,6 +143,23 @@
                 </StackPanel>
             </Border>
 
+            <!-- ============================== Startup ============================= -->
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Startup" Classes="section-title"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Open PokeLauncher on" VerticalAlignment="Center"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="180"
+                                  ItemsSource="{Binding StartPageOptions}"
+                                  SelectedItem="{Binding SelectedStartPage, Mode=TwoWay}"
+                                  AutomationProperties.Name="Startup page"/>
+                    </StackPanel>
+                    <CheckBox Content="Notify me when ROM files are waiting in the inbox"
+                              IsChecked="{Binding NotifyInboxAtStartup, Mode=TwoWay}"
+                              AutomationProperties.Name="Notify about inbox files at startup"/>
+                </StackPanel>
+            </Border>
+
             <!-- ===================== Emulator configuration ======================= -->
             <Border Classes="card">
                 <StackPanel Spacing="12">
@@ -190,6 +207,14 @@
                                         <TextBox Text="{Binding Arguments, Mode=TwoWay}" MinHeight="34"
                                                  PlaceholderText="Launch arguments, e.g. --fullscreen {rom}"
                                                  VerticalContentAlignment="Center"/>
+
+                                        <!-- Launch options -->
+                                        <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding SupportsFullscreen}">
+                                            <CheckBox Content="Launch in fullscreen"
+                                                      IsChecked="{Binding FullscreenEnabled, Mode=TwoWay}"
+                                                      AutomationProperties.Name="Launch in fullscreen"/>
+                                            <TextBlock Text="Edits the launch arguments for this emulator." Classes="tertiary" VerticalAlignment="Center"/>
+                                        </StackPanel>
 
                                         <!-- ============ official build download section ============ -->
                                         <StackPanel Spacing="8" IsVisible="{Binding HasDownloadOption}">

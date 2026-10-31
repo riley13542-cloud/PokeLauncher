@@ -210,6 +210,8 @@ public sealed partial class EmulatorSystemViewModel : ViewModelBase
         }
         _database.SaveEmulatorConfig(Key, value, Arguments);
         OnPropertyChanged(nameof(IsConfigured));
+        OnPropertyChanged(nameof(SupportsFullscreen));
+        OnPropertyChanged(nameof(FullscreenEnabled));
         RefreshComputed();
     }
 
@@ -220,6 +222,7 @@ public sealed partial class EmulatorSystemViewModel : ViewModelBase
             return;
         }
         _database.SaveEmulatorConfig(Key, ExecutablePath, value);
+        OnPropertyChanged(nameof(FullscreenEnabled));
     }
 
     partial void OnIsBusyChanged(bool value) => RefreshComputed();
@@ -370,6 +373,47 @@ public sealed partial class EmulatorSystemViewModel : ViewModelBase
     private static string FormatMegabytes(long bytes) =>
         (bytes / 1024.0 / 1024.0).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture) + " MB";
 
+    // ------------------------------------------------------------ launch options
+
+    /// <summary>Whether the configured emulator is known to PokeLauncher, so launch-option
+    /// toggles (like fullscreen) can be offered. Unknown emulators use manual arguments.</summary>
+    public bool SupportsFullscreen => EmulatorLaunchFlags.FullscreenFlagFor(ExecutablePath) is not null;
+
+    /// <summary>True when the configured emulator executable no longer exists on disk.</summary>
+    public bool IsEmulatorMissing => IsConfigured && !System.IO.File.Exists(ExecutablePath);
+
+    /// <summary>
+    /// Whether the fullscreen flag is present in the launch arguments. Toggling it edits
+    /// the argument template in place - custom arguments are preserved.
+    /// </summary>
+    public bool FullscreenEnabled
+    {
+        get
+        {
+            var flag = EmulatorLaunchFlags.FullscreenFlagFor(ExecutablePath);
+            return flag is not null && EmulatorLaunchFlags.HasFlag(Arguments, flag);
+        }
+        set
+        {
+            var flag = EmulatorLaunchFlags.FullscreenFlagFor(ExecutablePath);
+            if (flag is null || value == FullscreenEnabled)
+            {
+                return;
+            }
+            var updated = value
+                ? string.IsNullOrWhiteSpace(Arguments)
+                    ? flag
+                    : flag + " " + Arguments.Trim()
+                : EmulatorLaunchFlags.WithoutFlag(Arguments, flag);
+            _suppressPersist = true;
+            Arguments = updated;
+            _suppressPersist = false;
+            OnPropertyChanged(nameof(Arguments));
+            OnPropertyChanged(nameof(FullscreenEnabled));
+            _database.SaveEmulatorConfig(Key, ExecutablePath, Arguments);
+        }
+    }
+
     /// <summary>Opens a file dialog; called from Settings with the window's storage provider.</summary>
     public async Task BrowseExecutableAsync(IStorageProvider? storageProvider)
     {
@@ -402,6 +446,8 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     private bool _suppressAccentSideEffects = true;
     private readonly Action<int> _onBackupRetentionChanged;
     private readonly Action _onCoverArtModeChanged;
+    private readonly Action<string> _onStartPageChanged;
+    private readonly Action<bool> _onNotifyInboxChanged;
 
     public SettingsViewModel(
         AppDatabase database,
@@ -409,7 +455,9 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         Action<AccentOption> applyAccent,
         Action<bool> onDefaultViewChanged,
         Action<int> onBackupRetentionChanged,
-        Action onCoverArtModeChanged)
+        Action onCoverArtModeChanged,
+        Action<string> onStartPageChanged,
+        Action<bool> onNotifyInboxChanged)
     {
         _database = database;
         _downloadService = downloadService;
@@ -417,6 +465,8 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         _onDefaultViewChanged = onDefaultViewChanged;
         _onBackupRetentionChanged = onBackupRetentionChanged;
         _onCoverArtModeChanged = onCoverArtModeChanged;
+        _onStartPageChanged = onStartPageChanged;
+        _onNotifyInboxChanged = onNotifyInboxChanged;
 
         AccentOptions = new List<AccentOption>
         {
@@ -447,6 +497,12 @@ public sealed partial class SettingsViewModel : PageViewModelBase
             : CoverArtOptions[0];
         _selectedBackupRetention = BackupRetentionOptions.FirstOrDefault(o => o.Value == ParseRetention(database.GetSetting("saves.retention")))
                                    ?? BackupRetentionOptions[2];
+
+        var savedStartPage = database.GetSetting("ui.startPage");
+        _selectedStartPage = StartPageOptions.Contains(savedStartPage, StringComparer.Ordinal)
+            ? savedStartPage!
+            : StartPageOptions[0];
+        _notifyInboxAtStartup = database.GetSetting("startup.notifyInbox") != "0";
 
         var configs = database.LoadEmulatorConfigs();
         EmulatorSystemOptions = EmulatorSystems.All
@@ -561,6 +617,39 @@ public sealed partial class SettingsViewModel : PageViewModelBase
 
     [ObservableProperty]
     private BackupRetentionOption? _selectedBackupRetention;
+
+    /// <summary>Page the app opens on (persisted; applied by MainViewModel).</summary>
+    public IReadOnlyList<string> StartPageOptions { get; } = new[]
+    {
+        "Home", "My Library", "Recently Played",
+    };
+
+    [ObservableProperty]
+    private string _selectedStartPage;
+
+    partial void OnSelectedStartPageChanged(string value)
+    {
+        if (value is null || _suppressAccentSideEffects)
+        {
+            return;
+        }
+        _onStartPageChanged(value);
+        SaveSetting("ui.startPage", value, $"PokeLauncher will open on {value}.");
+    }
+
+    /// <summary>Show a toast at startup when ROM files are waiting in the inbox.</summary>
+    [ObservableProperty]
+    private bool _notifyInboxAtStartup;
+
+    partial void OnNotifyInboxAtStartupChanged(bool value)
+    {
+        if (_suppressAccentSideEffects)
+        {
+            return;
+        }
+        _onNotifyInboxChanged(value);
+        SaveSetting("startup.notifyInbox", value ? "1" : "0", "Inbox notification preference updated. Saved.");
+    }
 
     partial void OnSelectedBackupRetentionChanged(BackupRetentionOption? value)
     {
