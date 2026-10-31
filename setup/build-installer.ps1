@@ -12,7 +12,7 @@
 #   setup\installer\update.json
 
 param(
-    [string]$Version = "0.11.1",
+    [string]$Version = "0.11.2",
     [switch]$FrameworkDependent,
     [string]$DownloadUrlBase = "https://REPLACE-WITH-YOUR-DOWNLOAD-HOST/"
 )

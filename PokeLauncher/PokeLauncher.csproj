@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <Folder Include="Models\" />
-    <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Assets\**" Exclude="Assets\Built-in roms\**" />
   </ItemGroup>
 
   <!--
