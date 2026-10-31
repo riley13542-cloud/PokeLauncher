@@ -12,9 +12,9 @@
 #   setup\installer\update.json
 
 param(
-    [string]$Version = "0.11.2",
+    [string]$Version = "0.12.0",
     [switch]$FrameworkDependent,
-    [string]$DownloadUrlBase = "https://REPLACE-WITH-YOUR-DOWNLOAD-HOST/"
+    [string]$DownloadUrlBase = "https://github.com/riley13542-cloud/PokeLauncher/releases/download"
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,7 +26,7 @@ $publishArgs = @(
     '-c', 'Release', '-r', 'win-x64',
     '-p:PublishSingleFile=true', '-p:IncludeNativeLibrariesForSelfExtract=false'
 )
-if ($FrameworkDependent) { $publishArgs += '--self-contained', 'false' } else { $publishArgs += '--self-contained', 'true' }
+if ($SelfContained) { $publishArgs += '--self-contained', 'true' } else { $publishArgs += '--self-contained', 'false' }
 dotnet @publishArgs
 if ($LASTEXITCODE -ne 0) { throw "Publish failed ($LASTEXITCODE)" }
 
@@ -71,7 +71,7 @@ Write-Host "== 3. update.json (for the in-app update checker) ==" -ForegroundCol
 $fileName = Split-Path $installer -Leaf
 $updateJson = [ordered]@{
     version = $Version
-    url     = "$DownloadUrlBase$fileName"
+    url     = "$DownloadUrlBase/v$Version/$fileName"
     sha256  = $sha
     notes   = "See the About page in the app for what is new."
 }

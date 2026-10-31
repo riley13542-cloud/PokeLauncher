@@ -563,7 +563,8 @@ public partial class MainViewModel : ViewModelBase
             .ToList();
         var dialogViewModel = new ImportGamesDialogViewModel(analyses);
         var dialog = new ImportGamesDialog { DataContext = dialogViewModel };
-        var confirmed = await dialog.ShowDialog<bool?>(DialogOwner);
+        var dialogOwner = DialogOwner;
+        var confirmed = await dialog.ShowDialog<bool?>(dialogOwner);
         if (confirmed != true)
         {
             return;
@@ -1026,6 +1027,11 @@ public partial class MainViewModel : ViewModelBase
             ShowToast("That folder can't be found.");
             return;
         }
+        if (DialogOwner is null)
+        {
+            ShowToast("The dialog isn't available yet — wait for the window to finish loading.");
+            return;
+        }
 
         var files = Directory.GetFiles(folder)
             .Where(file => RomImportService.KnownExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
@@ -1042,7 +1048,8 @@ public partial class MainViewModel : ViewModelBase
             .ToList();
         var dialogViewModel = new ImportGamesDialogViewModel(analyses);
         var dialog = new ImportGamesDialog { DataContext = dialogViewModel };
-        var confirmed = await dialog.ShowDialog<bool?>(DialogOwner);
+        var dialogOwner = DialogOwner;
+        var confirmed = await dialog.ShowDialog<bool?>(dialogOwner);
         if (confirmed != true)
         {
             return;
@@ -1132,7 +1139,8 @@ public partial class MainViewModel : ViewModelBase
             .ToList();
         var dialogViewModel = new ImportGamesDialogViewModel(analyses);
         var dialog = new ImportGamesDialog { DataContext = dialogViewModel };
-        var confirmed = await dialog.ShowDialog<bool?>(DialogOwner);
+        var dialogOwner = DialogOwner;
+        var confirmed = await dialog.ShowDialog<bool?>(dialogOwner);
         if (confirmed != true)
         {
             return;
@@ -1142,7 +1150,6 @@ public partial class MainViewModel : ViewModelBase
         var added = 0;
         foreach (var row in dialogViewModel.ConfirmedRows())
         {
-            var gameId = row.Kind == RomImportKind.Attach ? row.ExistingGame?.Id : null;
             if (row.Kind == RomImportKind.Attach && row.ExistingGame is not null)
             {
                 var managedPath = await CopyIntoManagedLibraryAsync(row.FilePath, row.ExistingGame.Id);
@@ -1175,7 +1182,6 @@ public partial class MainViewModel : ViewModelBase
                     added++;
                 }
             }
-            _ = gameId;
         }
 
         var summaryParts = new List<string>();
