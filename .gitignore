@@ -1,4 +1,4 @@
-# --- Build outputs ---
+﻿# --- Build outputs ---
 [PokeLauncher]/[Bb]in/
 [PokeLauncher]/[Oo]bj/
 [PokeLauncher]/gen/
@@ -13,6 +13,9 @@
 *.suo
 *.userosscache
 *.sln.docstates
+
+# --- ROM files (never committed - copyright; users supply their own) ---
+PokeLauncher/Assets/Built-in roms/
 
 # --- Installer / release artifacts (built by setup\build-installer.ps1) ---
 setup/installer/
