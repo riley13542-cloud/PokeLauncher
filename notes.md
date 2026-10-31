@@ -215,6 +215,15 @@ Phase 2 (functional launcher) complete through milestone **0.11.1**: release rea
   `C:\Users\riley\Documents\PokeRomLauncher` (outside sync) and the tree was complete there.
   Lesson recorded: keep this project OUT of OneDrive; backups in `Backups\` were the safety net.
 
+  GitHub is live: repo github.com/riley13542-cloud/PokeLauncher (public, main pushed,
+  commit adf1a46), release v0.11.1 with setup.exe (sha256 verified against manifest) +
+  update.json attached. DefaultManifestUrl set to the stable
+  releases/latest/download/update.json URL. PENDING USER ACTION: the uploaded
+  update.json has a wrong download url (missing /releases/download/v0.11.1/) + a BOM -
+  replace the release asset with setup\installer\update.json (delete + re-drag on the
+  release edit page). Privacy option discussed: public repo = source always
+  downloadable (cannot be disabled); for private source + public releases use a second
+  public repo for release assets and point DefaultManifestUrl at it.
   Installer verified live: wizard opens ('Setup - PokeLauncher version 0.11.1'), install-mode
   prompt appears (per-user default), closes cleanly without installing. Gotcha: winget installs
   Inno Setup PER-USER (%LocalAppData%\Programs\Inno Setup 6) - build script now checks that path.

@@ -36,12 +36,14 @@ public sealed partial class LibraryViewModel : PageViewModelBase, ISearchablePag
     private readonly List<GameViewModel> _allGames;
     private readonly Func<Task> _requestImport;
     private readonly Func<Task> _checkInbox;
+    private readonly Func<Task> _requestFolderImport;
 
-    public LibraryViewModel(IReadOnlyList<GameViewModel> allGames, Func<Task> requestImport, Func<Task> checkInbox)
+    public LibraryViewModel(IReadOnlyList<GameViewModel> allGames, Func<Task> requestImport, Func<Task> checkInbox, Func<Task> requestFolderImport)
     {
         _allGames = allGames.ToList();
         _requestImport = requestImport;
         _checkInbox = checkInbox;
+        _requestFolderImport = requestFolderImport;
         foreach (var game in _allGames)
         {
             game.PropertyChanged += OnGamePropertyChanged;
@@ -225,6 +227,9 @@ public sealed partial class LibraryViewModel : PageViewModelBase, ISearchablePag
 
     [RelayCommand]
     private Task CheckInbox() => _checkInbox();
+
+    [RelayCommand]
+    private Task ImportFromFolder() => _requestFolderImport();
 
     [RelayCommand]
     private void ClearStatus() => StatusMessage = null;

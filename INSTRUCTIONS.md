@@ -1,4 +1,4 @@
-# PokeLauncher — Instructions
+﻿# PokeLauncher — Instructions
 
 How to add your own game files (ROMs), cover art, and your logo — and what to name them.
 
@@ -53,6 +53,12 @@ Or press `Win + R`, type `%LocalAppData%\PokeLauncher`, press Enter.
 4. The matched built-in games become playable (their cards change from
    "Not imported" to the file name). The files stay in the Inbox folder —
    delete them from there whenever you like; PokeLauncher already copied them.
+
+### Option A2 — Import from a folder (fastest if your files are already in one place)
+
+1. **My Library → Import from folder** → pick the folder that holds your game files.
+2. PokeLauncher scans it, matches every file against the built-in games, and one
+   confirmed step attaches them all. Nothing in the folder is moved or modified.
 
 ### Option B — Import Games (any game, any name)
 

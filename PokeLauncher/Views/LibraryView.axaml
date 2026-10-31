@@ -18,6 +18,15 @@
                 </StackPanel>
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                     <Button Theme="{StaticResource SecondaryButton}"
+                            Command="{Binding ImportFromFolderCommand}"
+                            AutomationProperties.Name="Import all games from a folder"
+                            ToolTip.Tip="Pick a folder of game files - PokeLauncher matches them against your library and attaches everything in one step. Files stay where they are.">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="&#xE8B7;" FontFamily="{StaticResource IconFont}" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Import from folder" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Theme="{StaticResource SecondaryButton}"
                             Command="{Binding CheckInboxCommand}"
                             AutomationProperties.Name="Check the ROM inbox"
                             ToolTip.Tip="Match game files you dropped into the managed ROM inbox against your library.">

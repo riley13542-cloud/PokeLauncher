@@ -81,7 +81,7 @@ public partial class MainViewModel : ViewModelBase
         var hackList = new ObservableCollection<RomHackViewModel>(hacks);
 
         Stats = new LibraryStatsViewModel(games, hackList);
-        Library = new LibraryViewModel(games, RequestImportAsync, RunInboxScanAsync);
+        Library = new LibraryViewModel(games, RequestImportAsync, RunInboxScanAsync, RunFolderImportAsync);
         HackBrowser = new HackBrowserViewModel(
             hackList,
             catalogGames.Select(g => g.Title).ToList(),
@@ -995,6 +995,107 @@ public partial class MainViewModel : ViewModelBase
         var collection = Collections.Collections.FirstOrDefault(c => c.Id == collectionId);
         var name = collection?.Name ?? "the collection";
         ShowToast(member ? $"Added to \u201C{name}\u201D." : $"Removed from \u201C{name}\u201D.");
+    }
+
+    // ==================================================================== folder import
+
+    /// <summary>
+    /// One-step attach for people who keep their game files in a folder: pick the folder,
+    /// PokeLauncher scans it, matches every file against the built-in catalog, and the
+    /// review dialog attaches them all in one go. Files in the source folder are only
+    /// ever read - nothing there is moved, modified, or deleted.
+    /// </summary>
+    private async Task RunFolderImportAsync()
+    {
+        if (StorageProvider is null)
+        {
+            ShowToast("The folder dialog isn't available yet - wait for the window to finish loading.");
+            return;
+        }
+        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Choose the folder that contains your game files",
+            AllowMultiple = false,
+        });
+        if (folders.Count == 0 || folders[0].TryGetLocalPath() is not { } folder)
+        {
+            return;
+        }
+        if (!Directory.Exists(folder))
+        {
+            ShowToast("That folder can't be found.");
+            return;
+        }
+
+        var files = Directory.GetFiles(folder)
+            .Where(file => RomImportService.KnownExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
+            .ToList();
+        if (files.Count == 0)
+        {
+            ShowToast($"No game files found in {folder}. Supported types: {RomImportService.SupportedExtensionsText}.");
+            return;
+        }
+
+        var currentGames = SnapshotGames();
+        var analyses = files
+            .Select(file => _imports.AnalyzeFile(file, currentGames))
+            .ToList();
+        var dialogViewModel = new ImportGamesDialogViewModel(analyses);
+        var dialog = new ImportGamesDialog { DataContext = dialogViewModel };
+        var confirmed = await dialog.ShowDialog<bool?>(DialogOwner);
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var attached = 0;
+        var added = 0;
+        foreach (var row in dialogViewModel.ConfirmedRows())
+        {
+            if (row.Kind == RomImportKind.Attach && row.ExistingGame is not null)
+            {
+                var managedPath = await CopyIntoManagedLibraryAsync(row.FilePath, row.ExistingGame.Id);
+                if (managedPath is null)
+                {
+                    continue;
+                }
+                _database.SaveGameRomPath(row.ExistingGame.Id, managedPath);
+                if (_gamesById.TryGetValue(row.ExistingGame.Id, out var existing))
+                {
+                    existing.ApplyRomPath(managedPath);
+                }
+                await AttachSidecarCoverIfPresentAsync(row.FilePath, row.ExistingGame.Id);
+                attached++;
+            }
+            else if (row.Kind == RomImportKind.New)
+            {
+                var model = _imports.BuildImportedGame(
+                    row.EffectiveTitle, row.Platform, row.Generation, row.FilePath, row.IsArchive);
+                var managedPath = await CopyIntoManagedLibraryAsync(row.FilePath, model.Id);
+                if (managedPath is null)
+                {
+                    continue;
+                }
+                var stored = model.WithRomPath(managedPath);
+                if (_database.AddImportedGame(stored))
+                {
+                    RegisterNewGame(stored);
+                    await AttachSidecarCoverIfPresentAsync(row.FilePath, stored.Id);
+                    added++;
+                }
+            }
+        }
+
+        var summaryParts = new List<string>();
+        if (attached > 0) { summaryParts.Add($"{attached} game{(attached == 1 ? "" : "s")} ready to play"); }
+        if (added > 0) { summaryParts.Add($"{added} new game{(added == 1 ? "" : "s")} added"); }
+        if (dialogViewModel.SkippedCount > 0) { summaryParts.Add($"{dialogViewModel.SkippedCount} skipped"); }
+        var summary = summaryParts.Count > 0 ? string.Join(", ", summaryParts) : "nothing imported";
+        if (ReferenceEquals(SelectedPage, Library))
+        {
+            Library.StatusMessage = $"Folder import complete: {summary}. Your files were not moved or modified.";
+        }
+        ShowToast($"Folder import complete: {summary}. Nothing in the folder was moved or modified.");
     }
 
     // ==================================================================== ROM inbox

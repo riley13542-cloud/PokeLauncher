@@ -108,7 +108,7 @@ public sealed partial class AboutViewModel : PageViewModelBase
 
     public string AppName => "PokeLauncher";
 
-    public string Version => "0.11.1-distribution";
+    public string Version => "0.11.2-distribution";
 
     public string Tagline => "Organize, discover, and launch your Pokémon collection.";
 
@@ -166,6 +166,7 @@ public sealed partial class AboutViewModel : PageViewModelBase
         new AboutStatusItem("Automatic save backups before every launch, with restore", true),
         new AboutStatusItem("Custom brand logo and per-game cover art", true),
         new AboutStatusItem("ROM inbox for attaching your own Gen I–IV files to the built-in catalog", true),
+        new AboutStatusItem("Import from folder: attach a whole folder of your files in one step", true),
         new AboutStatusItem("ROM hack library: add, edit, and launch your own hacks", true),
         new AboutStatusItem("Built-in update checker with SHA-256-verified downloads", true),
         new AboutStatusItem("Bundled Gen I–IV ROM files", false),
