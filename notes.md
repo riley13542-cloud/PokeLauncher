@@ -231,6 +231,11 @@ Phase 2 (functional launcher) complete through milestone **0.12.0**: release rea
   is code-reviewed only (this machine has the runtime). setup\installer now holds the 0.12.0
   setup.exe + update.json (url points at releases/download/v0.12.0/). GitHub: main pushed to
   20153f6. Release process documented in DISTRIBUTION.md.
+- 2026-10-31: Version 0.12.1 - Settings customization shipped (startup page, inbox toast
+  toggle, per-emulator fullscreen launch option for mGBA/melonDS) and the installer
+  rebuilt + verified (silent install produces all files, app launches). The 0.12.0
+  local artifacts were removed after the v0.12.0 GitHub release; 0.12.1 is the current
+  distributable.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by
