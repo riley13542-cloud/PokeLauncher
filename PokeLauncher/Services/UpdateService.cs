@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
@@ -48,7 +48,7 @@ public sealed class UpdateService
     /// this with their own URL (e.g. a GitHub Releases "latest" redirect or raw file).
     /// Empty disables update checks — the UI says so honestly.
     /// </summary>
-    public const string DefaultManifestUrl = "";
+    public const string DefaultManifestUrl = "https://github.com/riley13542-cloud/PokeLauncher/releases/latest/download/update.json";
 
     private readonly HttpClient _httpClient;
 
@@ -130,6 +130,7 @@ public sealed class UpdateService
     {
         try
         {
+            json = json.TrimStart('\uFEFF');
             using var document = System.Text.Json.JsonDocument.Parse(json);
             var root = document.RootElement;
             return new UpdateManifest
