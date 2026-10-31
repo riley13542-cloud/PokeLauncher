@@ -2,7 +2,7 @@
 
 ## Purpose
 Windows desktop Pokémon game launcher: emulator launching, ROM library, and ROM hack catalog.
-Phase 2 (functional launcher) complete through milestone **0.11.1**: release readiness.
+Phase 2 (functional launcher) complete through milestone **0.12.0**: release readiness.
 
 ## Stack & conventions
 - C# / .NET 10.0 (`net10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
@@ -31,8 +31,8 @@ Phase 2 (functional launcher) complete through milestone **0.11.1**: release rea
   - OneDrive can briefly hold file handles; retries exist in the emulator install path.
 - Agent rules live in `AGENT_RULES.md` (there is no `AGENTS.md`).
 
-## State (verified 2026-10-30)
-- `dotnet build`: 0 warnings, 0 errors. Version **0.11.1-distribution** (About page).
+## State (verified 2026-10-31)
+- `dotnet build`: 0 warnings, 0 errors. Version **0.12.0-distribution** (About page).
 - **Managed library (0.9.0)**: imported ROMs are **copied** into
   `%LocalAppData%\PokeLauncher\ROMs\<game-id>\` (`Services/ManagedLibrary`); `rom_path`
   points at the managed copy; originals are never moved/modified. Attaching a ROM to a
@@ -132,121 +132,106 @@ Phase 2 (functional launcher) complete through milestone **0.11.1**: release rea
 ## Session log
 - 2026-10-29: Project setup completed and verified.
 - 2026-10-29: App shell + navigation phase completed and verified.
-- 2026-10-29: Phase 2 continuation handoff written to `HANDOFF-PROMPT.md` (paste-first-message
-  prompt for a new chat). Includes the agreed direction for automatic emulator download:
-  manifest-driven (`emulators.json`), consent-based download from official sources only,
-  SHA-256 verification, install under `%LocalAppData%\PokeLauncher\Emulators\`, then write
-  into the existing `emulator_configs` table. Verified facts: mGBA = MPL-2.0, official
-  releases at github.com/mgba-emu/mgba (one build covers GB/GBC/GBA); melonDS = GPL-3.0,
-  github.com/melonDS-emu/melonDS / melonDS.kuribo64.net (melonds.org is unofficial and
-  distributes ROMs — never link it); melonDS may need user-provided BIOS/firmware. distribution
-  decision recorded: prefer on-demand download-from-official-source over pre-bundling binaries.
-- 2026-10-29: Phase 2 milestone "persistence foundation + settings": SQLite store added; mock
+- 2026-10-29: Phase 2 continuation handoff written to `HANDOFF-PROMPT.md`. Includes the
+  agreed direction for automatic emulator download: manifest-driven (`emulators.json`),
+  consent-based download from official sources only, SHA-256 verification, install under
+  `%LocalAppData%\PokeLauncher\Emulators\`. Verified facts: mGBA = MPL-2.0 (one build covers
+  GB/GBC/GBA); melonDS = GPL-3.0 (melonds.org is unofficial - never link it); melonDS may need
+  user-provided BIOS/firmware. Distribution decision: prefer on-demand download-from-official-source.
+- 2026-10-29: Milestone "persistence foundation + settings" (0.5.0): SQLite store added; mock
   user state replaced with honest seeds; favorites/bookmarks/emulator settings persisted;
-  per-system emulator config UI; details empty state; Roman-numeral generation labels unified
-  (Gen I–IV everywhere); version 0.5.0. Persistence behavior verified via temp console harness
-  (16/16) and UIA run (favorite from UI reached DB). Next: ROM import flow, then emulator launch.
+  per-system emulator config UI. Verified via temp console harness (16/16) + UIA.
 - 2026-10-29: Milestone "emulator setup" (0.6.0): manifest-driven consent downloads
   (`emulators.json`), SHA-256 verification, atomic extraction, auto-configuration of
   `emulator_configs`, per-system download UI + removal. mGBA 0.10.5 installed via the flow.
-- User-facing instructions written to `INSTRUCTIONS.md` (ROM inbox + import, cover art
-  naming, logo swap, emulator setup, troubleshooting) — referenced from this file so the
-  guidance lives with the project, not just in chat history.
-- 2026-10-30: **Milestone "core game functionality" (0.7.0)** — ROM import system
+- 2026-10-30: User-facing instructions written to `INSTRUCTIONS.md` (ROM inbox + import,
+  cover art naming, logo swap, emulator setup, troubleshooting).
+- 2026-10-30: **Incident**: OneDrive sync turned the project folder into a reparse point and
+  de-hydrated/wiped the working tree mid-session. All work was recovered; the user moved the
+  project out of OneDrive to `C:\Users\riley\Documents\PokeRomLauncher` (outside sync).
+  Lesson: keep this project OUT of OneDrive; backups in `Backups\` were the safety net.
+- 2026-10-30: **Milestone "core game functionality" (0.7.0)** - ROM import system
   (RomImportService + ImportGamesDialog review flow + duplicate protection), game launching
   (GameLauncherService + per-platform configs + specific error surfaces), playtime tracking
-  (play_sessions table + live GameViewModel state + session-end handling), metadata editing and
-  imported-game removal (EditGameDialog), live page refresh everywhere, About checklist + version.
-  Verified: 56/56 harness checks; UIA phases A 20/20, B 9/9, C 9/9; real-DB migration preserved
-  the user's data; mGBA config restored after tests. Key bugs found and fixed during testing:
-  missing `process.Exited` hook in the launcher, ComboBox TwoWay null-push into import rows
-  (platform became null → "Value must be set." SQLite error), missing PropertyChanged for
-  RemoveButtonLabel, flaky AVLN2000 from the `PlayAsyncCommand` name (renamed to `Play`),
-  review dialog focusing Confirm on open (stray Enter imported files; now focuses a text field).
-
-- 2026-10-30: **Milestone "logo, covers, inbox + polish" (0.10.0)** — brand logo (generated
-  app-icon.png/.ico bundled; a user-supplied %LocalAppData%\PokeLauncher\logo.png overrides the
-  sidebar mark + window/taskbar icon on next start), per-game custom cover art
-  (Covers\<game-id>.png/.jpg/… via ManagedLibrary, details-page Set/Remove cover art, sidecar
-  "<romname>.png" auto-attach on import, Settings toggle, GameCover control used by cards/rows/
-  hero/details), ROM inbox (ROMs\Inbox staging folder + "Check ROM inbox" review flow that
-  attaches dropped files to built-in Gen I–IV catalog entries; startup toast when pending),
-  "Missing ROMs" library filter, import dates (games.imported_at migration + details "Added"
-  row), collection toggle chips on game details (SetGameMembership), backup-retention setting
-  (saves.retention → SaveBackupService.Retention), About "What's new" card, version 0.10.0-polish.
-  **Bundling real Gen I–IV ROMs was declined (copyright)** — the honest alternative is the inbox
-  The user supplied their own app icon (Assets/app-icon.png/.ico; avalonia-logo.ico removed as
-  unreferenced). ROM/cover naming instructions were added to the Settings managed-library card.
-  + Missing-ROMs flow. Verified: M100 harness 16/16 (imported_at incl. pre-0.10 migration,
-  covers, inbox matching, retention), M090 20/20, M080 22/22, M070 56/56, UIA H 13/13,
-  G 11/11, F 6/6, E 7/7, D 17/17, C 9/9, B 9/9, A 20/20; Release publish (single-file,
-  framework-dependent) launches and closes cleanly. Bugs fixed in testing: stale _coverImage
-  when a cover was deleted (HasCoverArt never cleared), FindGameByRomPath column mismatch after
-  the imported_at change (regression suite caught it), MissingRomsOnly missing its Recalculate
-  hook, duplicate sidecar helper.
-- - - 2026-10-31: **Release readiness (0.11.1)** - uninstall now OFFERS full data removal: Inno
+  (play_sessions table + live GameViewModel state), metadata editing and imported-game removal
+  (EditGameDialog), live page refresh everywhere. Verified: 56/56 harness, UIA A 20/20, B 9/9,
+  C 9/9; real-DB migration preserved the user's data. Bugs fixed: missing `process.Exited` hook,
+  ComboBox TwoWay null-push into import rows ("Value must be set." SQLite error), missing
+  PropertyChanged for RemoveButtonLabel, flaky AVLN2000 from `PlayAsyncCommand` (renamed),
+  review dialog focusing Confirm on open (now focuses a text field).
+- 2026-10-30: **Milestone "managed library + save backups" (0.9.0)** - imported ROMs are copied
+  into `%LocalAppData%\PokeLauncher\ROMs\<game-id>\` (ManagedLibrary; attach flows copy too;
+  originals untouched), so emulator saves land inside PokeLauncher's data folder automatically;
+  SaveBackupService snapshots saves before every launch (additive, 20-per-game prune, same-second
+  suffixes), details-page "Saves and backups" section (list + Back up now + two-step restore with
+  a safety snapshot + delete), Settings "Managed library" card. Verified: M090 20/20, M080 22/22,
+  M070 56/56, UIA F 6/6, G 11/11, D 17/17, E 7/7, C 9/9, A 20/20, B 9/9.
+- 2026-10-30: **Milestone "collections + history" (0.8.0)** - custom collections
+  (create/rename/re-member/delete via EditCollectionDialog + checkbox member editor + filter;
+  two-step delete), LoadCollections no longer falls back to seeds in persistent mode,
+  details-page "Recent sessions" section + collection membership row, shared FormatHours.
+  Verified: M080 22/22, M070 56/56, UIA D 17/17, E 7/7, C rerun 9/9.
+- 2026-10-30: **Milestone "logo, covers, inbox + polish" (0.10.0)** - brand logo (generated
+  app-icon.png/.ico; a user-supplied %LocalAppData%\PokeLauncher\logo.png overrides the sidebar
+  mark + window/taskbar icon), per-game custom cover art (Covers\<game-id> via ManagedLibrary,
+  details-page Set/Remove cover art, sidecar "<romname>.png" auto-attach on import, Settings
+  toggle, GameCover control used by cards/rows/hero/details), ROM inbox (ROMs\Inbox staging
+  folder + "Check ROM inbox" review flow), "Missing ROMs" library filter, import dates
+  (games.imported_at), collection toggle chips on details (SetGameMembership), backup-retention
+  setting, About "What's new" card. **Bundling real Gen I-IV ROMs was declined (copyright)** -
+  the inbox + import flows attach the user's own files instead. The user supplied their own app
+  icon (Assets/app-icon.png/.ico; avalonia-logo.ico removed as unreferenced). Verified: M100
+  16/16 (imported_at incl. pre-0.10 migration, covers, inbox matching, retention), M090 20/20,
+  M080 22/22, M070 56/56, UIA H 13/13, G 11/11, F 6/6, E 7/7, D 17/17, C 9/9, B 9/9, A 20/20.
+  Bugs fixed: stale _coverImage when a cover was deleted, FindGameByRomPath column mismatch
+  (regression suite caught it), MissingRomsOnly missing its Recalculate hook, duplicate sidecar
+  helper.
+- 2026-10-30: **Milestone "distribution + hack library" (0.11.0)** - details-page overlap fixed
+  (Avalonia Grid needs explicit RowDefinitions for Grid.Row; rows had stacked into one since
+  0.7), info-strip text overflow fixed (horizontal StackPanels measure children with infinite
+  width - replaced with Grid columns). Built-in covers: the user's 16 Assets\Covers\<game-id>
+  images are embedded and shown for the built-in catalog. ROM hack browser is now a real user
+  library: rom_hacks table + CRUD, Add/Edit dialog (base game from the 16 catalog games,
+  patched-ROM browse, genre/difficulty/status), launch through the base game's emulator, empty
+  state + Add buttons, fictional seed hacks removed. Installer: setup\PokeLauncher.iss (Inno
+  Setup 6, per-user install) + setup\build-installer.ps1. Updates: Services\UpdateService -
+  manifest (version/url/sha256/notes) checked at startup and from About; download verified by
+  SHA-256; the user runs the downloaded installer themselves. Manifest URL:
+  UpdateService.DefaultManifestUrl (empty = checks disabled, UI says so honestly) or
+  POKELAUNCHER_UPDATE_MANIFEST env override. Verified: M100 16/16, M090 20/20, M080 22/22,
+  M070 56/56, UIA H 13/13, I 9/9, Release publish smoke, real-DB verify re-baselined to the
+  user's own 3 play sessions (kept - their data).
+- 2026-10-31: **Release readiness (0.11.1)** - uninstall now OFFERS full data removal: Inno
   Setup [Code] prompts to delete all PokeLauncher data and DelTree's %LocalAppData%\PokeLauncher
   on Yes (No keeps data for reinstall); inbox caveat disclosed in the prompt. DISTRIBUTION.md
   written (installer build, hosting, update.json format, release checklist).
-  setup\build-installer.ps1 now defaults to SELF-CONTAINED publish (no .NET runtime needed by
-  players, ~89 MB), takes -Version (passed to ISCC /DAppVersion), and generates
-  setup\installer\update.json (version/url placeholder/sha256 of the built installer) for the
-  update checker. Verified: self-contained publish launches+responsive+closes; all harnesses
-  and UIA phases re-run green; user data (16 games, 3 own sessions) preserved.
-2026-10-31: **Milestone "distribution + hack library" (0.11.0)** — details-page overlap fixed
-  (Avalonia Grid needs explicit RowDefinitions for Grid.Row to take effect; the info grid stacked
-  all rows into one — this had been silently broken since 0.7), info-strip text overflow fixed
-  (horizontal StackPanels measure children with infinite width → TextWrapping never wrapped;
-  replaced with Grid columns). Built-in covers: the user's 16 Assets\Covers\<game-id> images are
-  embedded and shown for the built-in catalog (data-folder Covers\ still overrides; placeholder
-  art remains for anything uncovered). ROM hack browser is now a real user library: rom_hacks
-  table + CRUD, Add/Edit dialog (title, base game from the 16 catalog games, patched-ROM browse,
-  genre/difficulty/status), launch through the base game's emulator, empty state + Add buttons,
-  fictional seed hacks removed. Installer: setup\PokeLauncher.iss (Inno Setup 6, per-user install)
-  + setup\build-installer.ps1 (publish + ISCC, falls back to a portable ZIP when ISCC is absent).
-  Updates: Services\UpdateService — manifest (version/url/sha256/notes) checked at startup and
-  from About; download verified by SHA-256; the user runs the downloaded installer themselves.
-  Manifest URL: UpdateService.DefaultManifestUrl (empty = checks disabled, UI says so honestly)
-  or POKELAUNCHER_UPDATE_MANIFEST env override. Verified: M100 16/16, M090 20/20, M080 22/22,
-  M070 56/56, UIA H 13/13, I 9/9 (hack add→details→two-step delete), Release publish smoke,
-  real-DB verify re-baselined to the user's own 3 play sessions (kept — their data).2026-10-30: **Incident**: OneDrive sync turned the project folder into a reparse point and
-  de-hydrated/wiped the working tree mid-session (root docs + all source folders emptied; the
-  build output survived). All work was recovered: the user moved the project out of OneDrive to
-  `C:\Users\riley\Documents\PokeRomLauncher` (outside sync) and the tree was complete there.
-  Lesson recorded: keep this project OUT of OneDrive; backups in `Backups\` were the safety net.
-
-  GitHub is live: repo github.com/riley13542-cloud/PokeLauncher (public, main pushed,
-  commit adf1a46), release v0.11.1 with setup.exe (sha256 verified against manifest) +
-  update.json attached. DefaultManifestUrl set to the stable
-  releases/latest/download/update.json URL. PENDING USER ACTION: the uploaded
-  update.json has a wrong download url (missing /releases/download/v0.11.1/) + a BOM -
-  replace the release asset with setup\installer\update.json (delete + re-drag on the
-  release edit page). Privacy option discussed: public repo = source always
-  downloadable (cannot be disabled); for private source + public releases use a second
-  public repo for release assets and point DefaultManifestUrl at it.
-  Installer verified live: wizard opens ('Setup - PokeLauncher version 0.11.1'), install-mode
-  prompt appears (per-user default), closes cleanly without installing. Gotcha: winget installs
-  Inno Setup PER-USER (%LocalAppData%\Programs\Inno Setup 6) - build script now checks that path.
-- 2026-10-30: **Incident**: OneDrive sync turned the project folder into a reparse point and
-  de-hydrated/wiped the working tree mid-session (root docs + all source folders emptied; the
-  build output survived). All work was recovered: the user moved the project out of OneDrive to
-  `C:\Users\riley\Documents\PokeRomLauncher` (outside sync) and the tree was complete there.
-  Lesson recorded: keep this project OUT of OneDrive; backups in `Backups\` were the safety net.
-- 2026-10-30: **Milestone "managed library + save backups" (0.9.0)** — imported ROMs are copied
-  into `%LocalAppData%\PokeLauncher\ROMs\<game-id>\` (ManagedLibrary; attach flows copy too;
-  originals untouched), so emulator saves land inside PokeLauncher's data folder automatically;
-  `SaveBackupService` snapshots saves before every launch into
-  `Saves\<game-id>\yyyy-MM-dd_HH-mm-ss\` (additive, 20-per-game prune, same-second suffixes),
-  details-page "Saves and backups" section (list + Back up now + two-step restore with a
-  safety snapshot + delete), Settings "Managed library" card replaces the placeholder
-  library-folder setting. Verified: M090 harness 20/20, M080 22/22, M070 56/56, UIA F 6/6,
-  G 11/11, D 17/17, E 7/7, C 9/9, A 20/20, B 9/9; build 0 warnings / 0 errors at the new
-  location; real DB + managed folders restored after tests.
-- 2026-10-30: **Milestone "collections + history" (0.8.0)** — custom collections
-  (create/rename/re-member/delete via EditCollectionDialog with checkbox member editor +
-  filter; two-step delete), `LoadCollections` no longer falls back to seeds in persistent mode
-  (deleted-empty state is honored; collections seed once via `collections.seeded` flag),
-  details page "Recent sessions" section + collection membership row, shared `FormatHours`
-  formatter. Verified: M080 harness 22/22, M070 harness 56/56 regression, UIA Phase D 17/17,
-  Phase E 7/7, Phase C rerun 9/9 (version 0.8.0); real DB restored after tests (collections
-  now part of the seed snapshot after a trace test deleted Hoenn Masters — restored).
+  setup\build-installer.ps1 defaults to SELF-CONTAINED publish, takes -Version (passed to ISCC
+  /DAppVersion), and generates setup\installer\update.json for the update checker.
+- 2026-10-31: GitHub is live: repo github.com/riley13542-cloud/PokeLauncher (public, main
+  pushed), release v0.11.1 with setup.exe + update.json attached. DefaultManifestUrl set to the
+  stable releases/latest/download/update.json URL. Privacy option discussed: public repo =
+  source always downloadable (cannot be disabled); for private source + public releases use a
+  second public repo for release assets and point DefaultManifestUrl at it. Gotcha: winget
+  installs Inno Setup PER-USER (%LocalAppData%\Programs\Inno Setup 6) - build script checks
+  that path.
+- 2026-10-31: **Milestone "release polish" (0.11.2)** - details info grid got explicit
+  RowDefinitions (Avalonia Grid ignores Grid.Row without them; rows stacked into one spot,
+  overlapping the collection picker - broken silently since 0.7, reported by the user with a
+  screenshot) and info strips were reworked to Grid columns (text inside a horizontal
+  StackPanel never wraps - it measured 1052px and overflowed the window). New Import-from-folder
+  flow on My Library (pick a folder, one confirmed step attaches every matched game; files are
+  only read). Version 0.11.2. Verified: M100 16/16, M090 20/20, M080 22/22, M070 56/56.
+- 2026-10-31: **Release readiness (0.12.0)** - installer is now FRAMEWORK-DEPENDENT (11 MB vs
+  89 MB) and checks for the .NET 10 Desktop Runtime when setup starts: registry-based detection
+  (HKLM64/HKCU64 dotnet Setup sharedfx Microsoft.WindowsDesktop.App 10.*, per-machine and
+  per-user), prompt to download from the official aka.ms/dotnet/10.0 link (BITS download via
+  PowerShell + interactive Microsoft installer + re-check), aborts honestly if still missing.
+  Existing-install detection via GetPreviousData (upgrade preserves data; same-version reinstall
+  asks first), running PokeLauncher.exe closed before file replacement. The .NET-missing branch
+  is code-reviewed only (this machine has the runtime). setup\installer now holds the 0.12.0
+  setup.exe + update.json (url points at releases/download/v0.12.0/). GitHub: main pushed to
+  20153f6. Release process documented in DISTRIBUTION.md.
+- PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
+  (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
+  setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by
+  publishing the 0.12.0 release.
