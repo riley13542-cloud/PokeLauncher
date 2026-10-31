@@ -38,7 +38,7 @@ UninstallDisplayIcon={app}\{#AppExe}
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "..\PokeLauncher\bin\Release\net10.0\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\PokeLauncher\bin\Release\net10.0\win-x64\publish\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExe}"

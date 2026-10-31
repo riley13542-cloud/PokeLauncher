@@ -21,6 +21,9 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 
 Write-Host "== 1. Release publish (v$Version) ==" -ForegroundColor Cyan
+# Clean the previous publish output so stale files can never reach the installer.
+$stalePublish = Join-Path $repo "PokeLauncher\bin\Release\net10.0\win-x64\publish"
+if (Test-Path $stalePublish) { Remove-Item $stalePublish -Recurse -Force }
 $publishArgs = @(
     'publish', "PokeLauncher\PokeLauncher.csproj",
     '-c', 'Release', '-r', 'win-x64',
