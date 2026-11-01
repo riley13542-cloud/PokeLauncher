@@ -66,16 +66,27 @@ public sealed class UpdateService
 
     private static readonly HttpClient SharedHttpClient = new() { Timeout = TimeSpan.FromSeconds(30) };
 
-    /// <summary>Compares dotted versions numerically; "0.10.0" > "0.9.0".</summary>
+    /// <summary>
+    /// Compares dotted versions numerically; "0.10.0" > "0.9.0". Tolerates suffixes
+    /// like "-distribution" or a leading "v" (e.g. "v0.12.1-distribution").
+    /// </summary>
     public static bool IsNewerVersion(string candidate, string current)
     {
-        Version.TryParse(candidate.TrimStart('v', 'V'), out var candidateVersion);
-        Version.TryParse(current.TrimStart('v', 'V'), out var currentVersion);
-        if (candidateVersion is null || currentVersion is null)
+        var candidateVersion = ParseVersion(candidate);
+        var currentVersion = ParseVersion(current);
+        return candidateVersion is not null && currentVersion is not null && candidateVersion > currentVersion;
+    }
+
+    /// <summary>Parses the numeric version prefix, ignoring suffixes like "-distribution".</summary>
+    private static Version? ParseVersion(string text)
+    {
+        text = text.TrimStart('v', 'V').Trim();
+        var end = 0;
+        while (end < text.Length && (char.IsDigit(text[end]) || text[end] == '.'))
         {
-            return false;
+            end++;
         }
-        return candidateVersion > currentVersion;
+        return end > 0 && Version.TryParse(text[..end], out var version) ? version : null;
     }
 
     public async Task<UpdateCheckResult> CheckForUpdatesAsync(string currentVersion, CancellationToken cancellationToken = default)

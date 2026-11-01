@@ -108,6 +108,15 @@ public partial class MainViewModel : ViewModelBase
             notifyInbox => _notifyInbox = notifyInbox);
         Settings.ControlsRequested += system => _ = OpenControlsDialog(system);
         About = new AboutViewModel();
+        About.InstallAndCloseRequested += () =>
+        {
+            // The verified installer was started; close PokeLauncher so it can replace files.
+            if (Application.Current?.ApplicationLifetime is
+                Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                desktop.Shutdown();
+            }
+        };
         Home = new HomeViewModel(
             games, hackList, Stats,
             OpenGame,

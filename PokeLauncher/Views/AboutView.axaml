@@ -104,6 +104,15 @@
                                 <TextBlock Text="Check for updates" VerticalAlignment="Center"/>
                             </StackPanel>
                         </Button>
+                        <Button Theme="{StaticResource PrimaryButton}" Padding="14,7"
+                                Command="{Binding InstallUpdateNowCommand}"
+                                IsVisible="{Binding IsInstallerReady}"
+                                AutomationProperties.Name="Install the downloaded update now (closes PokeLauncher)">
+                            <StackPanel Orientation="Horizontal" Spacing="7">
+                                <TextBlock Text="&#xE895;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center"/>
+                                <TextBlock Text="Install update now (closes PokeLauncher)" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                         <Button Theme="{StaticResource SecondaryButton}" Padding="14,7"
                                 Command="{Binding DownloadUpdateCommand}"
                                 IsVisible="{Binding PendingUpdateMessage, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"

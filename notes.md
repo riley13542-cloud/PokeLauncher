@@ -230,7 +230,9 @@ Phase 2 (functional launcher) complete through milestone **0.12.0**: release rea
   asks first), running PokeLauncher.exe closed before file replacement. The .NET-missing branch
   is code-reviewed only (this machine has the runtime). setup\installer now holds the 0.12.0
   setup.exe + update.json (url points at releases/download/v0.12.0/). GitHub: main pushed to
-  20153f6. Release process documented in DISTRIBUTION.md.
+  20153f6. Release process documented in DISTRIBUTION.md. Bug fixed: the melonDS TOML
+  reader didn't track [section] headers (bare keys inside [Keyboard] read as -1) -
+  fixed with section tracking; round-trip verified.
 - 2026-10-31: Version 0.12.1 - Settings customization shipped (startup page, inbox toast
   toggle, per-emulator fullscreen launch option for mGBA/melonDS) and the installer
   rebuilt + verified (silent install produces all files, app launches). The 0.12.0

@@ -44,7 +44,7 @@ public sealed partial class AboutViewModel : PageViewModelBase
     [ObservableProperty]
     public partial string? PendingUpdateMessage { get; private set; }
 
-    public string? PendingInstallerPath { get; private set; }
+
 
     [RelayCommand]
     private async Task CheckForUpdateAsync()
@@ -85,6 +85,9 @@ public sealed partial class AboutViewModel : PageViewModelBase
             var progress = new Progress<double>(percent => UpdateStatus = $"Downloading… {percent:0}%");
             var path = await _updates.DownloadInstallerAsync(_pendingManifest, progress);
             PendingInstallerPath = path;
+            OnPropertyChanged(nameof(PendingInstallerPath));
+            IsInstallerReady = true;
+            OnPropertyChanged(nameof(IsInstallerReady));
             PendingUpdateMessage = $"Version {_pendingManifest.Version} downloaded and verified. Close PokeLauncher and run the installer to finish updating.";
             UpdateStatus = $"Downloaded {System.IO.Path.GetFileName(path)} — close PokeLauncher, then run it.";
 
@@ -100,6 +103,28 @@ public sealed partial class AboutViewModel : PageViewModelBase
     }
 
     public bool IsDownloadingUpdate { get; private set; }
+
+    /// <summary>Path of the downloaded, SHA-256-verified installer (null until downloaded).</summary>
+    [ObservableProperty]
+    public partial string? PendingInstallerPath { get; private set; }
+
+    /// <summary>The verified installer is ready — one click runs it and closes the app.</summary>
+    [ObservableProperty]
+    public partial bool IsInstallerReady { get; private set; }
+
+    /// <summary>Raised when the user chooses to install the update and the app should close.</summary>
+    public event Action? InstallAndCloseRequested;
+
+    [RelayCommand]
+    private void InstallUpdateNow()
+    {
+        if (PendingInstallerPath is null || !_updates.RunInstaller(PendingInstallerPath))
+        {
+            UpdateStatus = "The installer could not be started — run the downloaded file manually.";
+            return;
+        }
+        InstallAndCloseRequested?.Invoke();
+    }
     public override string DisplayName => "About";
 
     public override string IconGlyph => "\uE946";
@@ -108,7 +133,7 @@ public sealed partial class AboutViewModel : PageViewModelBase
 
     public string AppName => "PokeLauncher";
 
-    public string Version => "0.12.1-distribution";
+    public string Version => "0.12.2-distribution";
 
     public string Tagline => "Organize, discover, and launch your Pokémon collection.";
 
