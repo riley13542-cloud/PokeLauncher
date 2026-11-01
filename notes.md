@@ -276,6 +276,15 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   records. User's own ROM files outside %LocalAppData% were never touched.
   Installer: 0.12.4 built (sha 499fa0ab...); all 4 harnesses green after the fix;
   M090 temp-DB fix held (no emulator-config pollution across runs).
+- 2026-11-01: **0.12.5 - Cancel crash in keyboard dialog fixed** - USER-REPORTED: pressing
+  Cancel crashed the app. Root cause: Cancel closed the dialog with result=false (bool),
+  but MainViewModel awaits ShowDialog<IReadOnlyDictionary<string,int>> - Avalonia casts
+  the result to T, bool->dictionary throws InvalidCastException on resume, app dies.
+  Cancel now closes with null (dialog result type matches). Also: Esc during assignment
+  now DISARMS the row (the tip always said it would - the code was assigning Esc as the
+  key instead). Verified via UIA: cancel closes dialog + app survives, esc disarms, save
+  still writes config.ini (keyA=88). All 4 harnesses green. Installer 0.12.5 built
+  (sha 499fa0ab->replaced; new sha in update.json); installed locally.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by

@@ -29,8 +29,11 @@ public partial class ControlsDialog : Window
         {
             // Save closes the dialog with the final map (MainViewModel writes it to
             // the emulator's config); Cancel closes with null (no changes saved).
+            // The result MUST match the ShowDialog<T> type parameter in
+            // MainViewModel - a bool here throws InvalidCastException on resume
+            // and crashes the app.
             _viewModel.SaveRequested += map => Close(map);
-            _viewModel.RequestClose += result => Close(result);
+            _viewModel.RequestClose += _ => Close(null);
         }
         this.GetVisualDescendants().OfType<Control>().FirstOrDefault()?.Focus();
     }

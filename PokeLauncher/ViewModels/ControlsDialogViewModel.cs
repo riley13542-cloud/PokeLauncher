@@ -114,13 +114,20 @@ public sealed partial class ControlsDialogViewModel : ObservableObject
         row.UpdateDisplay();
     }
 
-    /// <summary>Applies a captured key to the armed row (called by the window on KeyDown).</summary>
+    /// <summary>Applies a captured key to the armed row (called by the window on KeyDown).
+    /// Esc disarms the row without assigning, matching the dialog's tip text.</summary>
     public bool ApplyCapturedKey(Avalonia.Input.Key key)
     {
         var armed = Buttons.FirstOrDefault(r => r.IsAssigning);
         if (armed is null)
         {
             return false;
+        }
+        if (key == Avalonia.Input.Key.Escape)
+        {
+            armed.IsAssigning = false;
+            armed.UpdateDisplay();
+            return true;
         }
         var resolved = KeyMap.Resolve(key);
         if (resolved is not { } match)
