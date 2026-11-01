@@ -27,6 +27,10 @@ public partial class ControlsDialog : Window
         _viewModel = DataContext as ControlsDialogViewModel;
         if (_viewModel is not null)
         {
+            // Save closes the dialog with the final map (MainViewModel writes it to
+            // the emulator's config); Cancel closes with null (no changes saved).
+            _viewModel.SaveRequested += map => Close(map);
+            _viewModel.RequestClose += result => Close(result);
         }
         this.GetVisualDescendants().OfType<Control>().FirstOrDefault()?.Focus();
     }

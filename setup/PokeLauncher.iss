@@ -206,6 +206,13 @@ begin
   if not DirExists(DataDir) then
     Exit;
 
+  // Silent/unattended uninstalls NEVER delete data. A suppressed message box
+  // answers with its default button (Yes), which once wiped a user's data
+  // during an automated cleanup uninstall. Data deletion is interactive-only
+  // and always opt-in.
+  if WizardSilent then
+    Exit;
+
   if MsgBox(
        'Do you also want to delete all PokeLauncher data?' #13#10 #13#10 +
        'This removes your library database, managed ROM copies, save backups, ' +

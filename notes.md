@@ -258,6 +258,24 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   DB (root\library.db) - verified 2 consecutive clean runs with no pollution. M070Seed
   also gained emulator_configs snapshot/restore modes. Installer: 0.12.3 built
   (setup\installer\PokeLauncher-0.12.3-setup.exe + update.json, sha 9d17a7ec...).
+- 2026-11-01: **0.12.4 - keyboard-dialog Save fixed + installer data-loss bug fixed**.
+  (1) USER-REPORTED: Save controls in the keyboard dialog did nothing for melonDS/mGBA -
+  root cause: ControlsDialog.OnOpened had an EMPTY wiring block (lost in an earlier
+  cleanup), so SaveRequested/RequestClose had no listeners and the dialog never closed.
+  Fixed: Save now closes the dialog with the map and MainViewModel writes the emulator
+  config. Verified end-to-end via UIA on both mGBA (config.ini keyA=88 written on disk)
+  and melonDS (melonDS.toml A=88, Start=16777220).
+  (2) INCIDENT + FIX: an automated uninstall run with /SILENT /SUPPRESSMSGBOXES
+  auto-answered the "delete all data?" prompt (default Yes) and DelTree'd
+  %LocalAppData%\PokeLauncher - emulators, managed ROM copies, save backups, and the
+  DB WAL were deleted. The .iss now SKIPS data deletion entirely when WizardSilent
+  (interactive-only opt-in). Recovered: both emulators re-downloaded via the app's own
+  SHA-256-verified pipeline (EmulatorDownloadService probe), all four emulator_configs
+  rows repointed and verified; standard keyboard maps written (mGBA: X/Z/A/S/arrows,
+  melonDS: adds X=S/Y=A/L=Q/R=W). LOST (in the WAL, unrecoverable): the 9 play-session
+  records. User's own ROM files outside %LocalAppData% were never touched.
+  Installer: 0.12.4 built (sha 499fa0ab...); all 4 harnesses green after the fix;
+  M090 temp-DB fix held (no emulator-config pollution across runs).
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by
