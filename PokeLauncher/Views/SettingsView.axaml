@@ -154,6 +154,9 @@
                                   SelectedItem="{Binding SelectedStartPage, Mode=TwoWay}"
                                   AutomationProperties.Name="Startup page"/>
                     </StackPanel>
+                    <CheckBox Content="Remember window size and position"
+                              IsChecked="{Binding RememberWindowBounds, Mode=TwoWay}"
+                              AutomationProperties.Name="Remember window size and position"/>
                     <CheckBox Content="Notify me when ROM files are waiting in the inbox"
                               IsChecked="{Binding NotifyInboxAtStartup, Mode=TwoWay}"
                               AutomationProperties.Name="Notify about inbox files at startup"/>
@@ -208,7 +211,19 @@
                                                  PlaceholderText="Launch arguments, e.g. --fullscreen {rom}"
                                                  VerticalContentAlignment="Center"/>
 
-                                        <!-- Launch options -->
+                                        <!-- Keyboard controls + launch options -->
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <Button Theme="{StaticResource SecondaryButton}" Padding="10,5" FontSize="12"
+                                                    Command="{Binding RequestControlsCommand}"
+                                                    IsEnabled="{Binding IsConfigured}"
+                                                    AutomationProperties.Name="Keyboard controls">
+                                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                                    <TextBlock Text="&#xE7FC;" FontFamily="{StaticResource IconFont}" FontSize="13" VerticalAlignment="Center"/>
+                                                    <TextBlock Text="Keyboard controls" VerticalAlignment="Center"/>
+                                                </StackPanel>
+                                            </Button>
+                                            <TextBlock Text="Maps this emulator's keyboard controls in its own configuration file." Classes="tertiary" VerticalAlignment="Center"/>
+                                        </StackPanel>
                                         <StackPanel Orientation="Horizontal" Spacing="10" IsVisible="{Binding SupportsFullscreen}">
                                             <CheckBox Content="Launch in fullscreen"
                                                       IsChecked="{Binding FullscreenEnabled, Mode=TwoWay}"

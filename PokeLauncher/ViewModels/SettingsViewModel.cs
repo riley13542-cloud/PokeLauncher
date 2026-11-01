@@ -59,6 +59,10 @@ public sealed partial class EmulatorSystemViewModel : ViewModelBase
     private bool _suppressPersist;
     private CancellationTokenSource? _installCancellation;
 
+    /// <summary>Raised when the user asks to edit this system's keyboard controls
+    /// (MainViewModel opens the controls dialog).</summary>
+    public event Action<EmulatorSystemViewModel>? ControlsRequested;
+
     public EmulatorSystemViewModel(
         AppDatabase database,
         EmulatorDownloadService downloads,
@@ -414,6 +418,17 @@ public sealed partial class EmulatorSystemViewModel : ViewModelBase
         }
     }
 
+    [RelayCommand]
+    private void RequestControls()
+    {
+        if (!IsConfigured)
+        {
+            _notifyStatus?.Invoke($"Configure the {DisplayName} emulator first - PokeLauncher edits that emulator's own configuration file.");
+            return;
+        }
+        ControlsRequested?.Invoke(this);
+    }
+
     /// <summary>Opens a file dialog; called from Settings with the window's storage provider.</summary>
     public async Task BrowseExecutableAsync(IStorageProvider? storageProvider)
     {
@@ -503,6 +518,7 @@ public sealed partial class SettingsViewModel : PageViewModelBase
             ? savedStartPage!
             : StartPageOptions[0];
         _notifyInboxAtStartup = database.GetSetting("startup.notifyInbox") != "0";
+        _rememberWindowBounds = database.GetSetting("window.rememberBounds") != "0";
 
         var configs = database.LoadEmulatorConfigs();
         EmulatorSystemOptions = EmulatorSystems.All
@@ -517,6 +533,7 @@ public sealed partial class SettingsViewModel : PageViewModelBase
                         : new EmulatorConfig { SystemKey = system.Key },
                     notifyStatus: message => StatusMessage = message);
                 viewModel.InstallChanged += OnEmulatorInstallChanged;
+                viewModel.ControlsRequested += systemViewModel => ControlsRequested?.Invoke(systemViewModel);
                 return viewModel;
             })
             .ToList();
@@ -540,6 +557,10 @@ public sealed partial class SettingsViewModel : PageViewModelBase
 
     /// <summary>Wired from the window once it is open; used by the folder browser.</summary>
     public IStorageProvider? StorageProvider { get; set; }
+
+    /// <summary>Raised when a user asks to edit an emulator system keyboard controls
+    /// (MainViewModel opens the controls dialog and writes the emulator config).</summary>
+    public event Action<EmulatorSystemViewModel>? ControlsRequested;
 
     /// <summary>Opens a folder in the system file manager; wired from the window.</summary>
     public Func<string, Task>? OpenFolderHandler { get; set; }
@@ -635,6 +656,19 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         }
         _onStartPageChanged(value);
         SaveSetting("ui.startPage", value, $"PokeLauncher will open on {value}.");
+    }
+
+    /// <summary>Remember the main window size and position between sessions.</summary>
+    [ObservableProperty]
+    private bool _rememberWindowBounds;
+
+    partial void OnRememberWindowBoundsChanged(bool value)
+    {
+        if (_suppressAccentSideEffects)
+        {
+            return;
+        }
+        SaveSetting("window.rememberBounds", value ? "1" : "0", "Window size and position preference updated. Saved.");
     }
 
     /// <summary>Show a toast at startup when ROM files are waiting in the inbox.</summary>

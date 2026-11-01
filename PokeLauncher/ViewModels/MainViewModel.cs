@@ -35,6 +35,7 @@ public partial class MainViewModel : ViewModelBase
     private readonly RomImportService _imports;
     private readonly GameLauncherService _launcher;
     private readonly SaveBackupService _saveBackups = new();
+    private readonly EmulatorConfigService _emulatorConfigService = new();
     private readonly Dictionary<string, GameViewModel> _gamesById;
     private PageViewModelBase? _lastSidebarPage;
     private int _toastGeneration;
@@ -105,6 +106,7 @@ public partial class MainViewModel : ViewModelBase
             ApplyCoverArtMode,
             StartPage => ApplyStartPage(StartPage),
             notifyInbox => _notifyInbox = notifyInbox);
+        Settings.ControlsRequested += system => _ = OpenControlsDialog(system);
         About = new AboutViewModel();
         Home = new HomeViewModel(
             games, hackList, Stats,
@@ -312,6 +314,9 @@ public partial class MainViewModel : ViewModelBase
 
     /// <summary>Wired from the window once it is open; owner for modal dialogs.</summary>
     public Window? DialogOwner { get; set; }
+
+    /// <summary>Local database access for window-level persistence (MainWindow bounds).</summary>
+    public AppDatabase Database => _database;
 
     /// <summary>The brand logo shown in the sidebar (bundled emblem or user's logo.png).</summary>
     [ObservableProperty]
@@ -1121,6 +1126,48 @@ public partial class MainViewModel : ViewModelBase
             Library.StatusMessage = $"Folder import complete: {summary}. Your files were not moved or modified.";
         }
         ShowToast($"Folder import complete: {summary}. Nothing in the folder was moved or modified.");
+    }
+
+    // ==================================================================== keyboard controls
+
+    /// <summary>Opens the keyboard-controls editor for an emulator system and writes the
+    /// chosen mapping into that emulator's own configuration file (backup made first).</summary>
+    private async Task OpenControlsDialog(EmulatorSystemViewModel system)
+    {
+        if (DialogOwner is null)
+        {
+            ShowToast("The dialog isn't available yet — wait for the window to finish loading.");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(system.ExecutablePath) || !System.IO.File.Exists(system.ExecutablePath))
+        {
+            ShowToast($"The {system.DisplayName} emulator isn't installed yet — download or configure it first.");
+            return;
+        }
+
+        var definition = _emulatorConfigService.GetDefinition(system.Key);
+        if (definition is null)
+        {
+            ShowToast($"Keyboard controls aren't supported for {system.DisplayName} yet.");
+            return;
+        }
+
+        var emulatorName = System.IO.Path.GetFileNameWithoutExtension(system.ExecutablePath);
+        var current = _emulatorConfigService.ReadKeyboardMap(system.Key, system.ExecutablePath);
+        var controlsVm = new ControlsDialogViewModel(
+            system.Key, system.DisplayName, emulatorName,
+            _emulatorConfigService.GetConfigPath(system.Key, system.ExecutablePath)!,
+            current, definition.Buttons);
+
+        var dialog = new ControlsDialog { DataContext = controlsVm };
+        var savedMap = await dialog.ShowDialog<IReadOnlyDictionary<string, int>>(DialogOwner);
+        if (savedMap is null)
+        {
+            return;
+        }
+
+        _emulatorConfigService.WriteKeyboardMap(system.Key, system.ExecutablePath, savedMap);
+        ShowToast($"Keyboard controls saved for {system.DisplayName} ({emulatorName}). The emulator picks them up the next time it starts.");
     }
 
     // ==================================================================== ROM inbox
