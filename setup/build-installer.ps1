@@ -12,7 +12,7 @@
 #   setup\installer\update.json
 
 param(
-    [string]$Version = "0.12.2",
+    [string]$Version = "0.12.3",
     [switch]$FrameworkDependent,
     [string]$DownloadUrlBase = "https://github.com/riley13542-cloud/PokeLauncher/releases/download"
 )
