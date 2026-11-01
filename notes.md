@@ -5,7 +5,8 @@ Windows desktop Pokémon game launcher: emulator launching, ROM library, and ROM
 Phase 2 (functional launcher) complete through milestone **0.12.0**: release readiness.
 
 ## Stack & conventions
-- C# / .NET 10.0 (`net10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
+- C# / .NET 10.0 (
+et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
 - Persistence: **Microsoft.Data.Sqlite 10.0.14** (MIT). Database at
   `%LocalAppData%\PokeLauncher\library.db` (WAL, foreign keys). Deliberately outside the
   OneDrive-synced project folder to avoid sync conflicts.
@@ -238,7 +239,26 @@ Phase 2 (functional launcher) complete through milestone **0.12.0**: release rea
   rebuilt + verified (silent install produces all files, app launches). The 0.12.0
   local artifacts were removed after the v0.12.0 GitHub release; 0.12.1 is the current
   distributable.
-- 2026-10-31: **Milestone "one-click updates" (0.12.2)** - IsNewerVersion fixed: Version.TryParse`n  failed on the -distribution suffix (e.g. 0.11.1-distribution vs 0.12.1 always reported`n  up-to-date - THE root cause of the reported update.json not working); now parses the`n  numeric prefix. About page: one-click install - Check for updates, Download update`n  (SHA-256 verified), then Install update now runs the verified installer and closes`n  PokeLauncher (data preserved; Inno /SILENT /CLOSEAPPLICATIONS). Verified: M070 56/56,`n  M080 22/22, M090 20/20, M100 16/16; live check vs the hosted v0.12.1 manifest reports`n  available=True for a 0.11.1 client; installer runs from the one-click path. Version`n  0.12.2-distribution; setup\installer has the 0.12.2 setup.exe + update.json (double-slash`n  url fixed). PENDING: the update.json attached to release v0.12.1 still has the wrong url`n  + BOM - replace it or supersede with the v0.12.2 release.`n- 2026-10-31: **0.12.3 - GBA emulator-config pollution fixed** - the user reported`n  placeholder/auto-filled paths in Settings > GBA. Root cause: M090Test used`n  new AppDatabase() (the REAL library.db) and wrote a PowerShell path into`n  emulator_configs.GBA on every run. Fixed the user DB (fixgba), re-baselined the seed`n  snapshot (snapemu mode added; restoreemu available), and fixed M090Test to use a temp`n  DB (root\library.db) - verified 2 consecutive clean runs with no pollution. M070Seed`n  also gained emulator_configs snapshot/restore modes. Installer: 0.12.3 built`n  (setup\installer\PokeLauncher-0.12.3-setup.exe + update.json, sha 9d17a7ec...).`n- PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
+- 2026-10-31: **Milestone "one-click updates" (0.12.2)** - IsNewerVersion fixed: Version.TryParse
+  failed on the -distribution suffix (e.g. 0.11.1-distribution vs 0.12.1 always reported
+  up-to-date - THE root cause of the reported update.json not working); now parses the
+  numeric prefix. About page: one-click install - Check for updates, Download update
+  (SHA-256 verified), then Install update now runs the verified installer and closes
+  PokeLauncher (data preserved; Inno /SILENT /CLOSEAPPLICATIONS). Verified: M070 56/56,
+  M080 22/22, M090 20/20, M100 16/16; live check vs the hosted v0.12.1 manifest reports
+  available=True for a 0.11.1 client; installer runs from the one-click path. Version
+  0.12.2-distribution; setup\installer has the 0.12.2 setup.exe + update.json (double-slash
+  url fixed). PENDING: the update.json attached to release v0.12.1 still has the wrong url
+  + BOM - replace it or supersede with the v0.12.2 release.
+- 2026-10-31: **0.12.3 - GBA emulator-config pollution fixed** - the user reported
+  placeholder/auto-filled paths in Settings > GBA. Root cause: M090Test used
+  new AppDatabase() (the REAL library.db) and wrote a PowerShell path into
+  emulator_configs.GBA on every run. Fixed the user DB (fixgba), re-baselined the seed
+  snapshot (snapemu mode added; restoreemu available), and fixed M090Test to use a temp
+  DB (root\library.db) - verified 2 consecutive clean runs with no pollution. M070Seed
+  also gained emulator_configs snapshot/restore modes. Installer: 0.12.3 built
+  (setup\installer\PokeLauncher-0.12.3-setup.exe + update.json, sha 9d17a7ec...).
+- PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by
   publishing the 0.12.0 release.
