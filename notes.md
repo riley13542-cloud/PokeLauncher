@@ -298,6 +298,21 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   (appearance.theme/coverSize/uiScale) and apply on startup. UIA-verified live: cover
   width grows with Large, content scales exactly x1.15 at 115%, theme flips without
   crash. All 4 harnesses green. Installer 0.12.6 built; installed locally.
+- 2026-11-01: **0.12.7 - Stats dashboard, screenshots gallery, Discord Rich Presence**.
+  (1) Stats page (new nav item): total/week/month playtime cards, most-played bar list,
+  recent sessions across all games - new AppDatabase aggregates (LoadPlaytimeByGame with
+  games JOIN, LoadRecentPlaySessions, LoadPlaytimeTotals) + StatsViewModel (IRefreshablePage)
+  + StatsView (FuncValueConverter bar widths). (2) Screenshots gallery on the game details
+  page: ScreenshotService scans emulator folders recursively for images whose filename
+  contains the ROM base name (mGBA/melonDS naming), thumbnails via Bitmap.DecodeToWidth,
+  click opens the file; hint text mentions F12 in mGBA. (3) Discord Rich Presence via
+  Discord's local IPC pipe (discord-ipc-0; op 0 handshake / op 1 SET_ACTIVITY / op 3 ping,
+  dedicated drain-reader task): Settings > Integrations toggle + application ID (user
+  creates a free app at discord.com/developers), presence set on session start, cleared on
+  end, silent no-op when Discord is absent (verified no-crash). Probe-verified: aggregates
+  (5 sessions -> 160min total, week/month split correct), screenshot discovery, UIA:
+  Stats page renders, Integrations card persists (discord.enabled). All 4 harnesses green.
+  Installer 0.12.7 built; installed locally.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by

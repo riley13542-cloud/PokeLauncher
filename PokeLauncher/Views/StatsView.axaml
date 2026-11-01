@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:PokeLauncher.ViewModels"
+             xmlns:views="using:PokeLauncher.Views"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="800"
+             x:Class="PokeLauncher.Views.StatsView"
+             x:DataType="vm:StatsViewModel">
+
+    <DockPanel Margin="{DynamicResource PagePadding}">
+        <!-- Summary cards -->
+        <UniformGrid Rows="1" Columns="4" DockPanel.Dock="Top" Margin="0,16,0,0">
+            <Border Classes="card" Margin="0,0,10,0">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Total playtime" Classes="secondary" FontSize="12"/>
+                    <TextBlock Text="{Binding TotalPlaytime}" FontSize="21" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,10,0">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="Sessions" Classes="secondary" FontSize="12"/>
+                    <TextBlock Text="{Binding TotalSessions}" FontSize="21" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+            <Border Classes="card" Margin="0,0,10,0">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="This week" Classes="secondary" FontSize="12"/>
+                    <TextBlock Text="{Binding WeekPlaytime}" FontSize="21" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+            <Border Classes="card">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="This month" Classes="secondary" FontSize="12"/>
+                    <TextBlock Text="{Binding MonthPlaytime}" FontSize="21" FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+        </UniformGrid>
+
+        <ScrollViewer>
+            <StackPanel Spacing="18" Margin="0,18,0,0">
+                <!-- Most played -->
+                <Border Classes="card" IsVisible="{Binding HasData}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Most played" FontSize="16" FontWeight="SemiBold"/>
+                        <ItemsControl ItemsSource="{Binding TopGames}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:PlaytimeBarRow">
+                                    <Grid ColumnDefinitions="220,*,Auto" Margin="0,0,0,9" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                        <Border Grid.Column="1" Background="{DynamicResource SurfaceAltBrush}"
+                                                CornerRadius="6" Height="14" Margin="12,0" VerticalAlignment="Center">
+                                            <Border Background="{DynamicResource AccentGradientBrush}"
+                                                    CornerRadius="6" HorizontalAlignment="Left"
+                                                    Width="{Binding BarPercent, Converter={x:Static views:StatsView.BarWidthConverter}}"
+                                                    MinWidth="10"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding PlaytimeText}" FontSize="12.5" FontWeight="SemiBold"/>
+                                            <TextBlock Classes="tertiary" FontSize="11.5">
+                                                <Run Text="{Binding Sessions}"/><Run Text=" sessions"/>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Recent sessions -->
+                <Border Classes="card" IsVisible="{Binding HasRecentSessions}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Recent sessions" FontSize="16" FontWeight="SemiBold"/>
+                        <ItemsControl ItemsSource="{Binding RecentSessions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:RecentSessionLine">
+                                    <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,7">
+                                        <TextBlock Text="{Binding Title}" FontSize="12.5"
+                                                   TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Duration}" FontSize="12.5"
+                                                   FontWeight="SemiBold" Margin="14,0" VerticalAlignment="Center"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding When}" Classes="tertiary"
+                                                   FontSize="11.5" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Empty state -->
+                <Border Classes="card" IsVisible="{Binding !HasData}"
+                        HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                    <StackPanel Spacing="6" HorizontalAlignment="Center">
+                        <TextBlock Text="No playtime recorded yet" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Launch a game and the session length is tracked automatically - your stats will build up here."
+                                   Classes="secondary" FontSize="12" TextAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

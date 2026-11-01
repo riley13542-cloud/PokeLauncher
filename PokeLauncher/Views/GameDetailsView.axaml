@@ -208,6 +208,33 @@
                 </Grid>
             </Border>
 
+            <!-- ==================== Screenshots ==================== -->
+            <Border Classes="card" Padding="18" IsVisible="{Binding HasScreenshots}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Screenshots" Classes="section-title"/>
+                    <ItemsControl ItemsSource="{Binding Screenshots}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" ItemSpacing="10" LineSpacing="10"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ScreenshotItem">
+                                <Button Theme="{StaticResource SecondaryButton}" Padding="0" CornerRadius="8"
+                                        ClipToBounds="True" ToolTip.Tip="{Binding FileName}"
+                                        Command="{Binding $parent[ItemsControl].((vm:GameDetailsViewModel)DataContext).OpenScreenshotCommand}"
+                                        CommandParameter="{Binding}"
+                                        AutomationProperties.Name="Open screenshot">
+                                    <Image Source="{Binding Image}" Width="160" Height="120" Stretch="UniformToFill"/>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="Captured with the emulator's screenshot key (F12 in mGBA). Click one to open it full size."
+                               Classes="tertiary" FontSize="11"/>
+                </StackPanel>
+            </Border>
+
             <!-- ==================== Saves & backups ==================== -->
             <Border Classes="card" Padding="18" IsVisible="{Binding HasGame}">
                 <StackPanel Spacing="10" MaxWidth="640" HorizontalAlignment="Left">

@@ -512,6 +512,121 @@ public sealed class AppDatabase
         }
     }
 
+    // ---------------------------------------------------------- playtime dashboard
+
+    /// <summary>Per-game playtime totals, most-played first (Stats page).</summary>
+    public IReadOnlyList<PlaytimeByGameRow> LoadPlaytimeByGame(int limit = 20)
+    {
+        var rows = new List<PlaytimeByGameRow>();
+        if (_connection is null)
+        {
+            return rows;
+        }
+        try
+        {
+            using var command = _connection.CreateCommand();
+            command.CommandText = """
+                SELECT s.game_id,
+                       COALESCE(g.title, s.game_id) AS title,
+                       SUM(s.duration_seconds)      AS total_seconds,
+                       COUNT(*)                     AS sessions
+                FROM play_sessions s
+                LEFT JOIN games g ON g.id = s.game_id
+                GROUP BY s.game_id
+                ORDER BY total_seconds DESC
+                LIMIT $limit
+                """;
+            command.Parameters.AddWithValue("$limit", limit);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                rows.Add(new PlaytimeByGameRow(
+                    reader.GetString(0),
+                    reader.GetString(1),
+                    reader.GetDouble(2),
+                    reader.GetInt64(3)));
+            }
+        }
+        catch (Exception exception)
+        {
+            LoadError = $"Reading playtime totals failed: {exception.Message}";
+        }
+        return rows;
+    }
+
+    /// <summary>Most recent sessions across every game, newest first (Stats page).</summary>
+    public IReadOnlyList<PlaySessionRecord> LoadRecentPlaySessions(int limit = 25)
+    {
+        var sessions = new List<PlaySessionRecord>();
+        if (_connection is null)
+        {
+            return sessions;
+        }
+        try
+        {
+            using var command = _connection.CreateCommand();
+            command.CommandText = """
+                SELECT id, game_id, started_at, ended_at, duration_seconds
+                FROM play_sessions
+                ORDER BY started_at DESC
+                LIMIT $limit
+                """;
+            command.Parameters.AddWithValue("$limit", limit);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                sessions.Add(new PlaySessionRecord
+                {
+                    Id = reader.GetInt64(0),
+                    GameId = reader.GetString(1),
+                    StartedAt = reader.GetDateTime(2),
+                    EndedAt = reader.GetDateTime(3),
+                    DurationSeconds = reader.GetDouble(4),
+                });
+            }
+        }
+        catch (Exception exception)
+        {
+            LoadError = $"Reading recent sessions failed: {exception.Message}";
+        }
+        return sessions;
+    }
+
+    /// <summary>Grand playtime totals (Stats page summary cards).</summary>
+    public (double TotalSeconds, long Sessions, double WeekSeconds, double MonthSeconds) LoadPlaytimeTotals()
+    {
+        const double noData = 0;
+        if (_connection is null)
+        {
+            return (noData, 0, noData, noData);
+        }
+        try
+        {
+            var weekStart = DateTime.Now.AddDays(-(int)DateTime.Now.DayOfWeek).Date;
+            var monthStart = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            using var command = _connection.CreateCommand();
+            command.CommandText = """
+                SELECT COALESCE(SUM(duration_seconds), 0),
+                       COUNT(*),
+                       COALESCE(SUM(CASE WHEN started_at >= $weekStart THEN duration_seconds ELSE 0 END), 0),
+                       COALESCE(SUM(CASE WHEN started_at >= $monthStart THEN duration_seconds ELSE 0 END), 0)
+                FROM play_sessions
+                """;
+            command.Parameters.AddWithValue("$weekStart", weekStart.ToString("O", CultureInfo.InvariantCulture));
+            command.Parameters.AddWithValue("$monthStart", monthStart.ToString("O", CultureInfo.InvariantCulture));
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return (reader.GetDouble(0), reader.GetInt64(1), reader.GetDouble(2), reader.GetDouble(3));
+            }
+        }
+        catch (Exception exception)
+        {
+            LoadError = $"Reading playtime totals failed: {exception.Message}";
+        }
+        return (noData, 0, noData, noData);
+    }
+
     private static PokemonGame MapGame(SqliteDataReader reader)
     {
         DateTime? lastPlayed = null;

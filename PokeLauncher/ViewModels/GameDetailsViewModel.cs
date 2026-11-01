@@ -1,13 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PokeLauncher.Models;
 using PokeLauncher.Services;
 
 namespace PokeLauncher.ViewModels;
+
+/// <summary>One screenshot thumbnail in the details-page gallery.</summary>
+public sealed class ScreenshotItem : IDisposable
+{
+    public ScreenshotItem(string path, Bitmap image)
+    {
+        Path = path;
+        Image = image;
+        FileName = System.IO.Path.GetFileName(path);
+    }
+
+    public string Path { get; }
+
+    public string FileName { get; }
+
+    public Bitmap Image { get; private set; }
+
+    public void Dispose()
+    {
+        Image?.Dispose();
+        Image = null!;
+    }
+}
 
 /// <summary>One formatted row of the details page's "Recent sessions" list.</summary>
 public sealed record SessionLine(string Duration, string When);
@@ -58,6 +83,8 @@ public sealed partial class GameDetailsViewModel : PageViewModelBase
     private readonly Func<GameViewModel, Task> _setCoverArt;
     private readonly Func<GameViewModel, Task> _removeCoverArt;
     private readonly Func<string, string, bool, Task> _toggleCollection;
+    private readonly Func<GameViewModel?, IReadOnlyList<string>>? _loadScreenshots;
+    private readonly Action<string>? _openFile;
 
     public GameDetailsViewModel(
         Action<string> showToast,
@@ -72,7 +99,9 @@ public sealed partial class GameDetailsViewModel : PageViewModelBase
         SaveBackupService saveBackups,
         Func<GameViewModel, Task> setCoverArt,
         Func<GameViewModel, Task> removeCoverArt,
-        Func<string, string, bool, Task> toggleCollection)
+        Func<string, string, bool, Task> toggleCollection,
+        Func<GameViewModel?, IReadOnlyList<string>>? loadScreenshots = null,
+        Action<string>? openFile = null)
     {
         _showToast = showToast;
         _playGame = playGame;
@@ -87,6 +116,8 @@ public sealed partial class GameDetailsViewModel : PageViewModelBase
         _setCoverArt = setCoverArt;
         _removeCoverArt = removeCoverArt;
         _toggleCollection = toggleCollection;
+        _loadScreenshots = loadScreenshots;
+        _openFile = openFile;
     }
 
     public override string DisplayName => "Game Details";
@@ -173,6 +204,7 @@ public sealed partial class GameDetailsViewModel : PageViewModelBase
             Collections = Array.Empty<string>();
             CollectionChips = Array.Empty<CollectionChip>();
             SaveBackups = Array.Empty<SaveBackupRowViewModel>();
+            ClearScreenshots();
             OnPropertyChanged(nameof(HasSessions));
             OnPropertyChanged(nameof(SessionsCaption));
             OnPropertyChanged(nameof(HasCollections));
@@ -196,10 +228,60 @@ public sealed partial class GameDetailsViewModel : PageViewModelBase
         CollectionChips = _loadCollectionChips(game.Id);
         OnPropertyChanged(nameof(HasCollectionChips));
         RefreshSaves();
+        LoadScreenshots(game);
         OnPropertyChanged(nameof(HasSessions));
         OnPropertyChanged(nameof(SessionsCaption));
         OnPropertyChanged(nameof(HasCollections));
         OnPropertyChanged(nameof(CollectionsText));
+    }
+
+    // ---------------------------------------------------------- screenshots gallery
+
+    public ScreenshotItem[] Screenshots { get; private set; } = Array.Empty<ScreenshotItem>();
+
+    public bool HasScreenshots => Screenshots.Length > 0;
+
+    private void LoadScreenshots(GameViewModel game)
+    {
+        ClearScreenshots();
+        if (_loadScreenshots is null)
+        {
+            return;
+        }
+        try
+        {
+            var items = new List<ScreenshotItem>();
+            foreach (var path in _loadScreenshots(game).Take(12))
+            {
+                using var stream = File.OpenRead(path);
+                items.Add(new ScreenshotItem(path, Bitmap.DecodeToWidth(stream, 320)));
+            }
+            Screenshots = items.ToArray();
+            OnPropertyChanged(nameof(HasScreenshots));
+        }
+        catch
+        {
+            /* a decode failure leaves the gallery empty instead of breaking the page */
+        }
+    }
+
+    private void ClearScreenshots()
+    {
+        foreach (var item in Screenshots)
+        {
+            item.Dispose();
+        }
+        Screenshots = Array.Empty<ScreenshotItem>();
+        OnPropertyChanged(nameof(HasScreenshots));
+    }
+
+    [RelayCommand]
+    private void OpenScreenshot(ScreenshotItem? item)
+    {
+        if (item is not null && _openFile is not null)
+        {
+            _openFile(item.Path);
+        }
     }
 
     /// <summary>Re-reads the game's save-backup list from disk (keeping a pending

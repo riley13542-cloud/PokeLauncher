@@ -136,6 +136,7 @@ public partial class MainWindow : Window
         {
             if (mainViewModel.Database.GetSetting(RememberBoundsKey) == "0")
             {
+                mainViewModel.Shutdown();
                 return;
             }
 
@@ -159,6 +160,7 @@ public partial class MainWindow : Window
         {
             /* failing to save bounds must never block closing */
         }
+        mainViewModel.Shutdown();
     }
 
     private static Task OpenFolderAsync(string path)

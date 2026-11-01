@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,6 +37,19 @@ public partial class MainViewModel : ViewModelBase
     private readonly GameLauncherService _launcher;
     private readonly SaveBackupService _saveBackups = new();
     private readonly EmulatorConfigService _emulatorConfigService = new();
+    private readonly ScreenshotService _screenshots;
+    private readonly DiscordPresenceService _discord;
+
+    /// <summary>Current Discord Rich Presence settings (null client id = disabled).</summary>
+    private string? ResolveDiscordClientId()
+    {
+        if (_database.GetSetting("discord.enabled") != "1")
+        {
+            return null;
+        }
+        var clientId = _database.GetSetting("discord.clientId");
+        return string.IsNullOrWhiteSpace(clientId) ? null : clientId.Trim();
+    }
     private readonly Dictionary<string, GameViewModel> _gamesById;
     private PageViewModelBase? _lastSidebarPage;
     private int _toastGeneration;
@@ -45,6 +59,8 @@ public partial class MainViewModel : ViewModelBase
         _database = database;
         _imports = new RomImportService();
         _launcher = new GameLauncherService(database);
+        _screenshots = new ScreenshotService(database);
+        _discord = new DiscordPresenceService(ResolveDiscordClientId);
         _saveBackups.Retention = ParseRetention(database.GetSetting("saves.retention"));
         CoverArtMode.Set(database.GetSetting("ui.coverArt") != "placeholders");
         try
@@ -96,6 +112,10 @@ public partial class MainViewModel : ViewModelBase
             games,
             CreateCollectionAsync,
             EditCollectionAsync);
+        PlayStats = new StatsViewModel(
+            limit => database.LoadPlaytimeByGame(limit),
+            limit => database.LoadRecentPlaySessions(limit),
+            () => database.LoadPlaytimeTotals());
         EmulatorDownloads = new EmulatorDownloadService(database, new EmulatorCatalog());
         Settings = new SettingsViewModel(
             database,
@@ -144,7 +164,9 @@ public partial class MainViewModel : ViewModelBase
             _saveBackups,
             SetCoverArtAsync,
             RemoveCoverArtAsync,
-            ToggleCollectionAsync);
+            ToggleCollectionAsync,
+            game => _screenshots.ForRom(game?.RomPath),
+            OpenFileWithDefaultApp);
         HackDetails = new RomHackDetailsViewModel(
             ShowToast,
             PlayHackAsync,
@@ -159,6 +181,7 @@ public partial class MainViewModel : ViewModelBase
             new(Favorites, NavigateTo),
             new(RecentlyPlayed, NavigateTo),
             new(Collections, NavigateTo),
+            new(PlayStats, NavigateTo),
         };
         FooterNav = new NavItemViewModel[]
         {
@@ -304,6 +327,8 @@ public partial class MainViewModel : ViewModelBase
     public RecentlyPlayedViewModel RecentlyPlayed { get; }
 
     public CollectionsViewModel Collections { get; }
+
+    public StatsViewModel PlayStats { get; }
 
     /// <summary>On-demand official emulator downloads (Settings page drives it; a future
     /// first-run setup flow can reuse this).</summary>
@@ -451,6 +476,12 @@ public partial class MainViewModel : ViewModelBase
         };
     }
 
+    /// <summary>Stops background integrations on app close (Discord presence, etc.).</summary>
+    public void Shutdown()
+    {
+        _discord.Shutdown();
+    }
+
     /// <summary>Applies the app theme (Dark / Light / Midnight) via ThemeService.</summary>
     private void ApplyTheme(string theme) => ThemeService.ApplyTheme(theme);
 
@@ -473,6 +504,23 @@ public partial class MainViewModel : ViewModelBase
 
     private static double ParseUiScale(string value) =>
         double.TryParse(value.TrimEnd('%'), out var percent) ? percent / 100.0 : 1.0;
+
+    /// <summary>Opens a file with its default associated application (screenshots).</summary>
+    private static void OpenFileWithDefaultApp(string path)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true,
+            });
+        }
+        catch
+        {
+            /* nothing can open it; the file path is still visible in the UI */
+        }
+    }
 
     // ==================================================================== launching
 
@@ -534,11 +582,13 @@ public partial class MainViewModel : ViewModelBase
         {
             game.IsRunning = true;
         }
+        _discord.SetPresence(session.GameTitle, session.SystemKey);
     }
 
     private void OnSessionEnded(GameLaunchSession session, GameSessionEnd end)
     {
         // Raised on a background thread when the emulator process exits.
+        _discord.Clear();
         Dispatcher.UIThread.Post(() =>
         {
             if (!_gamesById.TryGetValue(session.GameId, out var game))
