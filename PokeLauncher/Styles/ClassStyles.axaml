@@ -22,8 +22,8 @@
     <Style Selector="Border.chip">
         <Setter Property="CornerRadius" Value="999"/>
         <Setter Property="Padding" Value="9,3"/>
-        <Setter Property="Background" Value="#2A2A38"/>
-        <Setter Property="BorderBrush" Value="#33FFFFFF"/>
+        <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource SubtleBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
     </Style>
     <Style Selector="Border.chip TextBlock">

@@ -8,6 +8,12 @@
     <SolidColorBrush x:Key="SurfaceBrush" Color="#1C1C26"/>
     <SolidColorBrush x:Key="SurfaceAltBrush" Color="#252530"/>
     <SolidColorBrush x:Key="SubtleBorderBrush" Color="#22FFFFFF"/>
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="#2A2A38"/>
+    <SolidColorBrush x:Key="SurfaceHoverBrush" Color="#2E2E3C"/>
+
+    <!-- Card cover size (grid view) - swappable at runtime from Settings -->
+    <x:Double x:Key="CardCoverWidth">176</x:Double>
+    <x:Double x:Key="CardCoverHeight">208</x:Double>
 
     <!-- Text -->
     <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F2F2F7"/>

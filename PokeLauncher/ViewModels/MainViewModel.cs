@@ -105,8 +105,16 @@ public partial class MainViewModel : ViewModelBase
             retention => _saveBackups.Retention = retention,
             ApplyCoverArtMode,
             StartPage => ApplyStartPage(StartPage),
-            notifyInbox => _notifyInbox = notifyInbox);
+            notifyInbox => _notifyInbox = notifyInbox,
+            ApplyTheme,
+            ApplyCoverSize,
+            ApplyUiScale);
         Settings.ControlsRequested += system => _ = OpenControlsDialog(system);
+
+        // Apply the saved appearance immediately so the first paint already matches.
+        ThemeService.ApplyTheme(Settings.SelectedTheme);
+        ThemeService.ApplyCoverSize(Settings.SelectedCoverSize);
+        ApplyUiScale(Settings.SelectedUiScale);
         About = new AboutViewModel();
         About.InstallAndCloseRequested += () =>
         {
@@ -442,6 +450,29 @@ public partial class MainViewModel : ViewModelBase
             },
         };
     }
+
+    /// <summary>Applies the app theme (Dark / Light / Midnight) via ThemeService.</summary>
+    private void ApplyTheme(string theme) => ThemeService.ApplyTheme(theme);
+
+    /// <summary>Applies the grid-view card cover size via ThemeService.</summary>
+    private void ApplyCoverSize(string size) => ThemeService.ApplyCoverSize(size);
+
+    /// <summary>Raised when the interface scale changes; MainWindow applies the transform.</summary>
+    public event Action<double>? UiScaleChanged;
+
+    private void ApplyUiScale(double scale)
+    {
+        CurrentUiScale = scale;
+        UiScaleChanged?.Invoke(scale);
+    }
+
+    /// <summary>The interface scale currently applied (1.0 = 100%), for MainWindow's first paint.</summary>
+    public double CurrentUiScale { get; private set; } = 1.0;
+
+    private void ApplyUiScale(string scaleText) => ApplyUiScale(ParseUiScale(scaleText));
+
+    private static double ParseUiScale(string value) =>
+        double.TryParse(value.TrimEnd('%'), out var percent) ? percent / 100.0 : 1.0;
 
     // ==================================================================== launching
 

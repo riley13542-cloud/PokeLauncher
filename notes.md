@@ -285,6 +285,19 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   key instead). Verified via UIA: cancel closes dialog + app survives, esc disarms, save
   still writes config.ini (keyA=88). All 4 harnesses green. Installer 0.12.5 built
   (sha 499fa0ab->replaced; new sha in update.json); installed locally.
+- 2026-11-01: **0.12.6 - Appearance settings expanded** - three new options in Settings >
+  Appearance, all following the accent-style runtime resource swap (no restart):
+  (1) Theme: Dark / Light / Midnight (OLED) via new ThemeService - swaps the surface/text/
+  border/input tokens + sets RequestedThemeVariant so built-in controls follow; the two
+  hardcoded dark colors (chip bg, card hover) became InputBackgroundBrush/SurfaceHoverBrush
+  tokens so light mode reads correctly. Hero overlay stays dark on purpose (text over
+  covers). (2) Cover size: Small/Medium/Large - Cards.axaml now binds the grid card panel
+  + GameCover to CardCoverWidth/Height resources (176x208 default). (3) Interface scale:
+  90/100/115/130% - MainWindow content wrapped in LayoutTransformControl; MainViewModel
+  raises UiScaleChanged, window applies ScaleTransform. All three persist
+  (appearance.theme/coverSize/uiScale) and apply on startup. UIA-verified live: cover
+  width grows with Large, content scales exactly x1.15 at 115%, theme flips without
+  crash. All 4 harnesses green. Installer 0.12.6 built; installed locally.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by

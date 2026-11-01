@@ -463,6 +463,9 @@ public sealed partial class SettingsViewModel : PageViewModelBase
     private readonly Action _onCoverArtModeChanged;
     private readonly Action<string> _onStartPageChanged;
     private readonly Action<bool> _onNotifyInboxChanged;
+    private readonly Action<string>? _onThemeChanged;
+    private readonly Action<string>? _onCoverSizeChanged;
+    private readonly Action<double>? _onUiScaleChanged;
 
     public SettingsViewModel(
         AppDatabase database,
@@ -472,7 +475,10 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         Action<int> onBackupRetentionChanged,
         Action onCoverArtModeChanged,
         Action<string> onStartPageChanged,
-        Action<bool> onNotifyInboxChanged)
+        Action<bool> onNotifyInboxChanged,
+        Action<string>? onThemeChanged = null,
+        Action<string>? onCoverSizeChanged = null,
+        Action<double>? onUiScaleChanged = null)
     {
         _database = database;
         _downloadService = downloadService;
@@ -482,6 +488,9 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         _onCoverArtModeChanged = onCoverArtModeChanged;
         _onStartPageChanged = onStartPageChanged;
         _onNotifyInboxChanged = onNotifyInboxChanged;
+        _onThemeChanged = onThemeChanged;
+        _onCoverSizeChanged = onCoverSizeChanged;
+        _onUiScaleChanged = onUiScaleChanged;
 
         AccentOptions = new List<AccentOption>
         {
@@ -519,6 +528,19 @@ public sealed partial class SettingsViewModel : PageViewModelBase
             : StartPageOptions[0];
         _notifyInboxAtStartup = database.GetSetting("startup.notifyInbox") != "0";
         _rememberWindowBounds = database.GetSetting("window.rememberBounds") != "0";
+
+        var savedTheme = database.GetSetting("appearance.theme");
+        _selectedTheme = ThemeService.ThemeOptions.Contains(savedTheme, StringComparer.OrdinalIgnoreCase)
+            ? savedTheme!
+            : ThemeService.DefaultTheme;
+        var savedCoverSize = database.GetSetting("appearance.coverSize");
+        _selectedCoverSize = ThemeService.CoverSizeOptions.Contains(savedCoverSize, StringComparer.OrdinalIgnoreCase)
+            ? savedCoverSize!
+            : ThemeService.DefaultCoverSize;
+        var savedUiScale = database.GetSetting("appearance.uiScale");
+        _selectedUiScale = ThemeService.UiScaleOptions.Contains(savedUiScale, StringComparer.OrdinalIgnoreCase)
+            ? savedUiScale!
+            : ThemeService.DefaultUiScale;
 
         var configs = database.LoadEmulatorConfigs();
         EmulatorSystemOptions = EmulatorSystems.All
@@ -699,6 +721,45 @@ public sealed partial class SettingsViewModel : PageViewModelBase
 
     [ObservableProperty]
     public partial string? StatusMessage { get; set; }
+
+    /// <summary>App theme choices for the appearance section.</summary>
+    public IReadOnlyList<string> ThemeOptions { get; } = ThemeService.ThemeOptions;
+
+    /// <summary>Game-card cover sizes for grid view.</summary>
+    public IReadOnlyList<string> CoverSizeOptions { get; } = ThemeService.CoverSizeOptions;
+
+    /// <summary>Interface scale choices.</summary>
+    public IReadOnlyList<string> UiScaleOptions { get; } = ThemeService.UiScaleOptions;
+
+    [ObservableProperty]
+    private string _selectedTheme = ThemeService.DefaultTheme;
+
+    [ObservableProperty]
+    private string _selectedCoverSize = ThemeService.DefaultCoverSize;
+
+    [ObservableProperty]
+    private string _selectedUiScale = ThemeService.DefaultUiScale;
+
+    partial void OnSelectedThemeChanged(string value)
+    {
+        _onThemeChanged?.Invoke(value);
+        StatusMessage = SaveSetting("appearance.theme", value, $"Theme changed to {value}. Saved.");
+    }
+
+    partial void OnSelectedCoverSizeChanged(string value)
+    {
+        _onCoverSizeChanged?.Invoke(value);
+        StatusMessage = SaveSetting("appearance.coverSize", value, $"{value} covers. Saved.");
+    }
+
+    partial void OnSelectedUiScaleChanged(string value)
+    {
+        if (double.TryParse(value.TrimEnd('%'), out var percent))
+        {
+            _onUiScaleChanged?.Invoke(percent / 100.0);
+        }
+        StatusMessage = SaveSetting("appearance.uiScale", value, $"Interface scaled to {value}. Saved.");
+    }
 
     partial void OnSelectedAccentChanged(AccentOption? value)
     {

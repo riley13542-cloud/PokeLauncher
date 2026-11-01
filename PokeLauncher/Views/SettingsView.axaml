@@ -71,6 +71,33 @@
                         <TextBlock Text="The accent recolors highlights, buttons, and selection indicators right away."
                                    Classes="tertiary"/>
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Theme" VerticalAlignment="Center"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="180"
+                                  ItemsSource="{Binding ThemeOptions}"
+                                  SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
+                                  AutomationProperties.Name="App theme"/>
+                        <TextBlock Text="Light switches every surface to a bright palette; Midnight is a true-black OLED theme."
+                                   Classes="tertiary" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Cover size (grid view)" VerticalAlignment="Center"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="180"
+                                  ItemsSource="{Binding CoverSizeOptions}"
+                                  SelectedItem="{Binding SelectedCoverSize, Mode=TwoWay}"
+                                  AutomationProperties.Name="Cover size"/>
+                        <TextBlock Text="How large game cards appear in the library grid."
+                                   Classes="tertiary" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Interface scale" VerticalAlignment="Center"/>
+                        <ComboBox Theme="{StaticResource FilterComboBox}" MinWidth="180"
+                                  ItemsSource="{Binding UiScaleOptions}"
+                                  SelectedItem="{Binding SelectedUiScale, Mode=TwoWay}"
+                                  AutomationProperties.Name="Interface scale"/>
+                        <TextBlock Text="Scales the whole interface - handy on high-DPI or small screens."
+                                   Classes="tertiary" VerticalAlignment="Center"/>
+                    </StackPanel>
                     <StackPanel Spacing="8">
                         <TextBlock Text="Default library view" Classes="group-label"/>
                         <StackPanel Orientation="Horizontal" Spacing="10">

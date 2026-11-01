@@ -6,11 +6,13 @@
 
     <!-- Game card: grid view, Home rows, Favorites, Recently Played, Collections -->
     <DataTemplate x:Key="GameCardTemplate" x:DataType="vm:GameViewModel">
-        <Panel Width="176" Margin="0,0,14,14">
+        <Panel Width="{DynamicResource CardCoverWidth}" Margin="0,0,14,14">
             <Button Theme="{StaticResource CardButton}" Command="{Binding OpenCommand}"
                     AutomationProperties.Name="{Binding Title}">
                 <StackPanel>
-                    <controls:GameCover Width="176" Height="208" Game="{Binding}"
+                    <controls:GameCover Width="{DynamicResource CardCoverWidth}"
+                                               Height="{DynamicResource CardCoverHeight}"
+                                               Game="{Binding}"
                                                Title="{Binding Title}"
                                                Subtitle="{Binding Platform}"
                                                FromColor="{Binding CoverFrom}"

@@ -14,7 +14,8 @@
         Background="{DynamicResource BgBaseBrush}"
         FontFamily="fonts:Inter#Inter,Segoe UI">
 
-    <Grid ColumnDefinitions="248,*">
+    <LayoutTransformControl x:Name="UiScaleHost">
+        <Grid ColumnDefinitions="248,*">
 
         <!-- ============================ Sidebar ============================ -->
         <Border Grid.Column="0" Background="{DynamicResource SidebarBrush}"
@@ -112,5 +113,6 @@
                 </StackPanel>
             </Border>
         </Grid>
-    </Grid>
+        </Grid>
+    </LayoutTransformControl>
 </Window>

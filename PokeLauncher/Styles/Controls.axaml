@@ -66,7 +66,7 @@
         </Style>
         <Style Selector="^:pointerover /template/ Border#Root">
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBorderBrush}"/>
-            <Setter Property="Background" Value="#2E2E3C"/>
+            <Setter Property="Background" Value="{DynamicResource SurfaceHoverBrush}"/>
         </Style>
         <Style Selector="^:pressed /template/ Border#Root">
             <Setter Property="Opacity" Value="0.85"/>

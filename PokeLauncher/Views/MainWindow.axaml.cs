@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using PokeLauncher.Services;
 using PokeLauncher.ViewModels;
@@ -46,7 +47,16 @@ public partial class MainWindow : Window
             mainViewModel.Settings.OpenFolderHandler = OpenFolderAsync;
             ApplyBrandLogo(mainViewModel);
             RestoreWindowBounds(mainViewModel.Database);
+            ApplyUiScale(mainViewModel);
         }
+    }
+
+    // ---------------------------------------------------------- interface scale
+
+    private void ApplyUiScale(MainViewModel mainViewModel)
+    {
+        mainViewModel.UiScaleChanged += scale => UiScaleHost.LayoutTransform = new ScaleTransform(scale, scale);
+        UiScaleHost.LayoutTransform = new ScaleTransform(mainViewModel.CurrentUiScale, mainViewModel.CurrentUiScale);
     }
 
     /// <summary>
