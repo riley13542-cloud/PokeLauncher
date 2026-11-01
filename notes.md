@@ -238,7 +238,7 @@ Phase 2 (functional launcher) complete through milestone **0.12.0**: release rea
   rebuilt + verified (silent install produces all files, app launches). The 0.12.0
   local artifacts were removed after the v0.12.0 GitHub release; 0.12.1 is the current
   distributable.
-- PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
+- 2026-10-31: **Milestone "one-click updates" (0.12.2)** - IsNewerVersion fixed: Version.TryParse`n  failed on the -distribution suffix (e.g. 0.11.1-distribution vs 0.12.1 always reported`n  up-to-date - THE root cause of the reported update.json not working); now parses the`n  numeric prefix. About page: one-click install - Check for updates, Download update`n  (SHA-256 verified), then Install update now runs the verified installer and closes`n  PokeLauncher (data preserved; Inno /SILENT /CLOSEAPPLICATIONS). Verified: M070 56/56,`n  M080 22/22, M090 20/20, M100 16/16; live check vs the hosted v0.12.1 manifest reports`n  available=True for a 0.11.1 client; installer runs from the one-click path. Version`n  0.12.2-distribution; setup\installer has the 0.12.2 setup.exe + update.json (double-slash`n  url fixed). PENDING: the update.json attached to release v0.12.1 still has the wrong url`n  + BOM - replace it or supersede with the v0.12.2 release.`n- PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by
   publishing the 0.12.0 release.
