@@ -322,6 +322,19 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   page; ignored otherwise). Probe + UIA verified: built-in ID resolves when enabled,
   toggle persists, no crash without Discord. All 4 harnesses green. Installer 0.12.8
   built; installed locally.
+- 2026-11-02: **0.12.9 - Discord Rich Presence actually works now** - user reported
+  presence not showing. Diagnosis: (a) Discord was not running when first checked
+  (no processes, no discord-ipc pipes) and (b) two real protocol bugs: timestamps.start
+  was serialized as an ISO date string but Discord expects UNIX EPOCH SECONDS (verified
+  against docs.discord.com SET_ACTIVITY payload), and SET_ACTIVITY was pushed before the
+  handshake round-trip completed. Fixed: unix-seconds long, READY-wait (reader task
+  signals READY; presence sent after, dirty-flag re-armed), status breadcrumb
+  (LastStatus: idle/connected/...). LIVE-VERIFIED against the real Discord desktop app
+  (user launched it): handshake READY received, SET_ACTIVITY accepted (reply echoes
+  details/state/application_id; unknown "launcher" asset key ignored as expected), real
+  DiscordPresenceService reaches "connected". NOTE: presence requires the Discord
+  DESKTOP app (browser Discord does not expose the IPC pipe). All 4 harnesses green.
+  Installer 0.12.9 built; installed locally.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by

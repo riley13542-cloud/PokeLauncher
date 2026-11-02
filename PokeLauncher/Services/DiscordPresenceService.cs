@@ -12,9 +12,9 @@ namespace PokeLauncher.Services;
 
 /// <summary>
 /// Discord Rich Presence over Discord's local IPC pipe (no server, no accounts).
-/// Requires a free Discord application ID from discord.com/developers/applications;
-/// without one the service stays disabled. Every operation is best-effort: Discord
-/// not running, the pipe missing, or any protocol hiccup never affects the launcher.
+/// Requires the Discord desktop app to be running; without it the service stays
+/// idle. Every operation is best-effort: Discord not running, the pipe missing, or
+/// any protocol hiccup never affects the launcher.
 /// </summary>
 public sealed class DiscordPresenceService : IDisposable
 {
@@ -34,8 +34,11 @@ public sealed class DiscordPresenceService : IDisposable
     private CancellationTokenSource? _cts;
     private NamedPipeClientStream? _pipe;
     private (string Details, string State)? _presence;
-    private DateTime _startedAtUtc;
+    private long _startedAtUnix;
     private bool _dirty;
+
+    /// <summary>Last connection outcome, for diagnostics ("connected", "discord not running", ...).</summary>
+    public string LastStatus { get; private set; } = "idle";
 
     public DiscordPresenceService(Func<string?> resolveClientId)
     {
@@ -51,7 +54,7 @@ public sealed class DiscordPresenceService : IDisposable
             return;
         }
         _presence = (Truncate(title, 120), Truncate(platform, 120));
-        _startedAtUtc = DateTime.UtcNow;
+        _startedAtUnix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         _dirty = true;
         EnsureConnected();
     }
@@ -99,17 +102,11 @@ public sealed class DiscordPresenceService : IDisposable
         }
 
         _cts = new CancellationTokenSource();
-        var pipe = new NamedPipeClientStream(".", $"discord-ipc-{DiscordPipeSlot()}", PipeDirection.InOut);
+        var pipe = new NamedPipeClientStream(".", "discord-ipc-0", PipeDirection.InOut);
         _pipe = pipe;
         var token = _cts.Token;
         var id = clientId;
         _ = Task.Run(async () => await RunPumpAsync(pipe, id, token), token);
-    }
-
-    private static int DiscordPipeSlot()
-    {
-        // Discord names its pipes discord-ipc-0..9; slot 0 is the primary client.
-        return 0;
     }
 
     private async Task RunPumpAsync(NamedPipeClientStream pipe, string clientId, CancellationToken token)
@@ -121,23 +118,41 @@ public sealed class DiscordPresenceService : IDisposable
             await WriteFrameAsync(pipe, OpHandshake,
                 JsonSerializer.Serialize(new { v = 1, client_id = clientId }), token);
 
-            // A dedicated reader drains Discord's responses (pongs, dispatch events);
-            // blocking reads are fine here because cancelling the token disposes the
-            // pipe, which unblocks (and ends) the read with an exception.
+            // A dedicated reader parses Discord's frames and signals when the
+            // handshake round-trip completes (the READY event). Blocking reads are
+            // fine here because cancelling the token disposes the pipe, which
+            // unblocks (and ends) the read with an exception.
+            var ready = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             _ = Task.Run(async () =>
             {
                 try
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        if (!TryReadFrame(pipe, out _, out _, out _))
+                        if (!TryReadFrame(pipe, out var payload))
                         {
                             break;
+                        }
+                        var text = Encoding.UTF8.GetString(payload);
+                        if (text.Contains("READY", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ready.TrySetResult(true);
                         }
                     }
                 }
                 catch { /* pipe closed - expected on shutdown */ }
             }, token);
+
+            LastStatus = "connected; waiting for READY";
+
+            // Wait for READY (with a deadline) before pushing presence.
+            var readyInTime = await Task.WhenAny(ready.Task, Task.Delay(5000, token)) == ready.Task;
+            LastStatus = readyInTime ? "connected" : "connected (no READY yet)";
+
+            if (readyInTime)
+            {
+                _dirty = true;
+            }
 
             var lastBeat = DateTime.UtcNow;
             using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
@@ -168,9 +183,11 @@ public sealed class DiscordPresenceService : IDisposable
                 _pipe = null;
             }
         }
-        catch
+        catch (Exception exception)
         {
-            // Discord not running / user closed it / protocol change: silent by design.
+            // Discord not running / user closed it / protocol change: silent by design,
+            // but the status keeps a breadcrumb for the Settings page / diagnostics.
+            LastStatus = exception.Message.Length > 80 ? exception.Message[..80] : exception.Message;
             TryClearPresence(pipe);
             pipe.Dispose();
             if (ReferenceEquals(_pipe, pipe))
@@ -187,7 +204,8 @@ public sealed class DiscordPresenceService : IDisposable
             {
                 details = presence.Details,
                 state = presence.State,
-                timestamps = new { start = _startedAtUtc },
+                // Discord expects Unix epoch seconds (an integer), not a date string.
+                timestamps = new { start = _startedAtUnix },
                 assets = new { large_image = "launcher", large_text = "PokeLauncher" },
                 instance = false,
             }
@@ -245,10 +263,8 @@ public sealed class DiscordPresenceService : IDisposable
         WriteFrameAsync(pipe, op, json, CancellationToken.None).GetAwaiter().GetResult();
     }
 
-    private static bool TryReadFrame(NamedPipeClientStream pipe, out int op, out int length, out byte[] payload)
+    private static bool TryReadFrame(NamedPipeClientStream pipe, out byte[] payload)
     {
-        op = 0;
-        length = 0;
         payload = Array.Empty<byte>();
         try
         {
@@ -257,8 +273,7 @@ public sealed class DiscordPresenceService : IDisposable
             {
                 return false;
             }
-            op = BinaryPrimitives.ReadInt32LittleEndian(header);
-            length = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(4));
+            var length = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(4));
             if (length is < 0 or > 512 * 1024)
             {
                 return false;
