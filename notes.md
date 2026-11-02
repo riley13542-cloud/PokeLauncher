@@ -337,6 +337,17 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   Installer 0.12.9 built; installed locally. DECISION (user): the bundled official
   box art in Assets\Covers (embedded via csproj Assets\**, loaded by GameViewModel.FindBundledCover)
   stays as-is for now - user acknowledged the copyright-exposure note and chose to keep it.
+- 2026-11-02: **0.12.10 - Discord presence auto-retry** - user still reported no profile
+  presence. State verified live: Discord desktop running (discord-ipc-0 present), toggle
+  enabled, 0.12.9 installed. Most likely failure mode: the pump connected ONCE at game
+  launch - if Discord was started after the game (or restarted), it failed silently and
+  never retried. Fixed: the pump now retries every 5s while a presence is pending, so
+  presence appears whenever Discord comes online; stops retrying after Clear (nothing
+  pending). Live test with the real service against the running Discord: connected +
+  presence pushed for 75s. If it still does not show on the profile, the remaining
+  causes are Discord-side: Activity Privacy "Share your detected activities" must be
+  ON, status must not be Invisible, check the profile card (avatar in a server/DM).
+  All 4 harnesses green; installer 0.12.10 built; installed locally.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by

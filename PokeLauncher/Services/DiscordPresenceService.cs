@@ -111,88 +111,115 @@ public sealed class DiscordPresenceService : IDisposable
 
     private async Task RunPumpAsync(NamedPipeClientStream pipe, string clientId, CancellationToken token)
     {
-        try
+        // Keep retrying while a presence is pending: Discord may start AFTER the game
+        // does (or restart mid-session), and the pipe only exists while it runs.
+        while (!token.IsCancellationRequested)
         {
-            await pipe.ConnectAsync(3000, token);
-
-            await WriteFrameAsync(pipe, OpHandshake,
-                JsonSerializer.Serialize(new { v = 1, client_id = clientId }), token);
-
-            // A dedicated reader parses Discord's frames and signals when the
-            // handshake round-trip completes (the READY event). Blocking reads are
-            // fine here because cancelling the token disposes the pipe, which
-            // unblocks (and ends) the read with an exception.
-            var ready = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _ = Task.Run(async () =>
+            try
             {
-                try
+                await pipe.ConnectAsync(3000, token);
+
+                await WriteFrameAsync(pipe, OpHandshake,
+                    JsonSerializer.Serialize(new { v = 1, client_id = clientId }), token);
+
+                // A dedicated reader parses Discord's frames and signals when the
+                // handshake round-trip completes (the READY event). Blocking reads are
+                // fine here because cancelling the token disposes the pipe, which
+                // unblocks (and ends) the read with an exception.
+                var ready = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+                _ = Task.Run(async () =>
                 {
-                    while (!token.IsCancellationRequested)
+                    try
                     {
-                        if (!TryReadFrame(pipe, out var payload))
+                        while (!token.IsCancellationRequested)
                         {
-                            break;
-                        }
-                        var text = Encoding.UTF8.GetString(payload);
-                        if (text.Contains("READY", StringComparison.OrdinalIgnoreCase))
-                        {
-                            ready.TrySetResult(true);
+                            if (!TryReadFrame(pipe, out var payload))
+                            {
+                                break;
+                            }
+                            var text = Encoding.UTF8.GetString(payload);
+                            if (text.Contains("READY", StringComparison.OrdinalIgnoreCase))
+                            {
+                                ready.TrySetResult(true);
+                            }
                         }
                     }
+                    catch { /* pipe closed - expected on shutdown */ }
+                }, token);
+
+                LastStatus = "connecting...";
+
+                // Wait for READY (with a deadline) before pushing presence.
+                var readyInTime = await Task.WhenAny(ready.Task, Task.Delay(5000, token)) == ready.Task;
+                LastStatus = readyInTime ? "connected" : "connected (no READY yet)";
+
+                if (readyInTime)
+                {
+                    _dirty = true;
                 }
-                catch { /* pipe closed - expected on shutdown */ }
-            }, token);
 
-            LastStatus = "connected; waiting for READY";
+                var lastBeat = DateTime.UtcNow;
+                using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
 
-            // Wait for READY (with a deadline) before pushing presence.
-            var readyInTime = await Task.WhenAny(ready.Task, Task.Delay(5000, token)) == ready.Task;
-            LastStatus = readyInTime ? "connected" : "connected (no READY yet)";
+                while (!token.IsCancellationRequested && pipe.IsConnected)
+                {
+                    if (_dirty)
+                    {
+                        _dirty = false;
+                        await SendPresenceAsync(pipe, token);
+                    }
 
-            if (readyInTime)
+                    if (DateTime.UtcNow - lastBeat >= TimeSpan.FromSeconds(15))
+                    {
+                        lastBeat = DateTime.UtcNow;
+                        await WriteFrameAsync(pipe, OpPing, JsonSerializer.Serialize(new { nonce = Guid.NewGuid().ToString() }), token);
+                    }
+
+                    await timer.WaitForNextTickAsync(token);
+                }
+            }
+            catch (OperationCanceledException)
             {
-                _dirty = true;
+                TryClearPresence(pipe);
+                pipe.Dispose();
+                if (ReferenceEquals(_pipe, pipe))
+                {
+                    _pipe = null;
+                }
+                return;
+            }
+            catch
+            {
+                // Discord not running / user closed it / protocol change: silent by design.
+                LastStatus = "waiting for Discord";
             }
 
-            var lastBeat = DateTime.UtcNow;
-            using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
-
-            while (!token.IsCancellationRequested && pipe.IsConnected)
+            try
             {
-                if (_dirty)
-                {
-                    _dirty = false;
-                    await SendPresenceAsync(pipe, token);
-                }
-
-                if (DateTime.UtcNow - lastBeat >= TimeSpan.FromSeconds(15))
-                {
-                    lastBeat = DateTime.UtcNow;
-                    await WriteFrameAsync(pipe, OpPing, JsonSerializer.Serialize(new { nonce = Guid.NewGuid().ToString() }), token);
-                }
-
-                await timer.WaitForNextTickAsync(token);
+                pipe.Dispose();
             }
-        }
-        catch (OperationCanceledException)
-        {
-            TryClearPresence(pipe);
-            pipe.Dispose();
+            catch { /* already gone */ }
             if (ReferenceEquals(_pipe, pipe))
             {
                 _pipe = null;
             }
-        }
-        catch (Exception exception)
-        {
-            // Discord not running / user closed it / protocol change: silent by design,
-            // but the status keeps a breadcrumb for the Settings page / diagnostics.
-            LastStatus = exception.Message.Length > 80 ? exception.Message[..80] : exception.Message;
-            TryClearPresence(pipe);
-            pipe.Dispose();
-            if (ReferenceEquals(_pipe, pipe))
+
+            if (_presence is null)
             {
-                _pipe = null;
+                // Nothing to show anymore - stop retrying until the next launch.
+                return;
+            }
+
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5), token);
+                // Fresh pipe object for the next attempt.
+                pipe = new NamedPipeClientStream(".", "discord-ipc-0", PipeDirection.InOut);
+                _pipe = pipe;
+            }
+            catch (OperationCanceledException)
+            {
+                return;
             }
         }
     }
