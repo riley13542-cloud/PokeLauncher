@@ -529,7 +529,6 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         _notifyInboxAtStartup = database.GetSetting("startup.notifyInbox") != "0";
         _rememberWindowBounds = database.GetSetting("window.rememberBounds") != "0";
         _discordPresenceEnabled = database.GetSetting("discord.enabled") == "1";
-        _discordClientId = database.GetSetting("discord.clientId") ?? string.Empty;
 
         var savedTheme = database.GetSetting("appearance.theme");
         _selectedTheme = ThemeService.ThemeOptions.Contains(savedTheme, StringComparer.OrdinalIgnoreCase)
@@ -704,15 +703,6 @@ public sealed partial class SettingsViewModel : PageViewModelBase
         SaveSetting("discord.enabled", value ? "1" : "0", value
             ? "Discord Rich Presence on - starts with your next game launch. Saved."
             : "Discord Rich Presence off. Saved.");
-    }
-
-    /// <summary>Discord application ID for Rich Presence (free from discord.com/developers).</summary>
-    [ObservableProperty]
-    private string _discordClientId = string.Empty;
-
-    partial void OnDiscordClientIdChanged(string value)
-    {
-        SaveSetting("discord.clientId", value.Trim(), "Discord application ID saved - it applies to your next game launch.");
     }
 
     /// <summary>Show a toast at startup when ROM files are waiting in the inbox.</summary>

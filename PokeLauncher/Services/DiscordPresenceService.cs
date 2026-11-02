@@ -22,6 +22,13 @@ public sealed class DiscordPresenceService : IDisposable
     private const int OpFrame = 1;
     private const int OpPing = 3;
 
+    /// <summary>
+    /// PokeLauncher's Discord application. Presence works out of the box with no
+    /// user setup; uploading artwork named "launcher" to that application page on
+    /// discord.com/developers adds the cover image automatically.
+    /// </summary>
+    public const string DefaultClientId = "1566616918691946586";
+
     private readonly Func<string?> _resolveClientId;
     private readonly SemaphoreSlim _gate = new(1, 1);
     private CancellationTokenSource? _cts;
@@ -181,6 +188,7 @@ public sealed class DiscordPresenceService : IDisposable
                 details = presence.Details,
                 state = presence.State,
                 timestamps = new { start = _startedAtUtc },
+                assets = new { large_image = "launcher", large_text = "PokeLauncher" },
                 instance = false,
             }
             : (object)new { };

@@ -197,15 +197,8 @@
                     <CheckBox Content="Show what I'm playing on Discord (Rich Presence)"
                               IsChecked="{Binding DiscordPresenceEnabled, Mode=TwoWay}"
                               AutomationProperties.Name="Discord Rich Presence"/>
-                    <StackPanel Orientation="Horizontal" Spacing="10">
-                        <TextBlock Text="Discord application ID" VerticalAlignment="Center"/>
-                        <TextBox Theme="{StaticResource SearchTextBox}" Width="280"
-                                 Text="{Binding DiscordClientId, Mode=TwoWay}"
-                                 PlaceholderText="e.g. 1234567890123456789"
-                                 AutomationProperties.Name="Discord application ID"/>
-                    </StackPanel>
                     <TextBlock Classes="tertiary" FontSize="11.5" TextWrapping="Wrap"
-                               Text="Create a free application at discord.com/developers/applications and paste its Application ID here. Discord must be running; the presence appears when you launch a game and clears when it closes."/>
+                               Text="No setup needed - just enable it and keep Discord running. Your current game appears on your Discord profile while the emulator is open, and clears when it closes."/>
                 </StackPanel>
             </Border>
 

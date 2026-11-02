@@ -313,6 +313,15 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   (5 sessions -> 160min total, week/month split correct), screenshot discovery, UIA:
   Stats page renders, Integrations card persists (discord.enabled). All 4 harnesses green.
   Installer 0.12.7 built; installed locally.
+- 2026-11-01: **0.12.8 - Discord Rich Presence built-in application ID** - the user's
+  Discord application (1566616918691946586) is baked into DiscordPresenceService
+  (DefaultClientId); users only flip the Settings > Integrations toggle - no ID entry
+  needed. Application-ID textbox removed from the Integrations card (clientId setting
+  no longer read). Presence payload now references a "launcher" large image key (shows
+  automatically if artwork named "launcher" is uploaded to the Discord application
+  page; ignored otherwise). Probe + UIA verified: built-in ID resolves when enabled,
+  toggle persists, no crash without Discord. All 4 harnesses green. Installer 0.12.8
+  built; installed locally.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by

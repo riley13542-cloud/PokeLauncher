@@ -40,15 +40,12 @@ public partial class MainViewModel : ViewModelBase
     private readonly ScreenshotService _screenshots;
     private readonly DiscordPresenceService _discord;
 
-    /// <summary>Current Discord Rich Presence settings (null client id = disabled).</summary>
+    /// <summary>Current Discord Rich Presence settings: on = the built-in application.</summary>
     private string? ResolveDiscordClientId()
     {
-        if (_database.GetSetting("discord.enabled") != "1")
-        {
-            return null;
-        }
-        var clientId = _database.GetSetting("discord.clientId");
-        return string.IsNullOrWhiteSpace(clientId) ? null : clientId.Trim();
+        return _database.GetSetting("discord.enabled") == "1"
+            ? DiscordPresenceService.DefaultClientId
+            : null;
     }
     private readonly Dictionary<string, GameViewModel> _gamesById;
     private PageViewModelBase? _lastSidebarPage;
