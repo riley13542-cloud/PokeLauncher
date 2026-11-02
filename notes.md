@@ -334,7 +334,9 @@ et10.0`), Avalonia UI 12.1.4, MVVM via CommunityToolkit.Mvvm 8.4.2
   details/state/application_id; unknown "launcher" asset key ignored as expected), real
   DiscordPresenceService reaches "connected". NOTE: presence requires the Discord
   DESKTOP app (browser Discord does not expose the IPC pipe). All 4 harnesses green.
-  Installer 0.12.9 built; installed locally.
+  Installer 0.12.9 built; installed locally. DECISION (user): the bundled official
+  box art in Assets\Covers (embedded via csproj Assets\**, loaded by GameViewModel.FindBundledCover)
+  stays as-is for now - user acknowledged the copyright-exposure note and chose to keep it.
 - PENDING USER ACTION: the update.json attached to release v0.11.1 has a wrong download url
   (missing /releases/download/v0.11.1/) + a BOM - replace that release asset with
   setup\installer\update.json (delete + re-drag on the release edit page), or supersede it by
